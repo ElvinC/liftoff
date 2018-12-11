@@ -1,0 +1,19 @@
+#canvas {
+    border: 1px solid #000000;
+}
+body {
+    margin:0;
+    overflow: hidden;
+}
+
+#HUD {
+    font-family: sans-serif;
+    position: fixed;
+    font-size: 22px;
+    top: 20px;
+    left: 20px;
+    width: 120px;
+    padding: 40px;
+    background-color: rgba(0, 0, 0, 0.4);
+    color: #fff;
+}

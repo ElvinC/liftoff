@@ -1,0 +1,16 @@
+{
+    "extends": "airbnb-base",
+    "rules":{
+        "indent": ["error", 4],
+        "import/prefer-default-export": false,
+        "no-restricted-properties": 0,
+        "max-len": [1, 120],
+        "no-plusplus": [2, { "allowForLoopAfterthoughts": true }],
+        "no-underscore-dangle":"off"
+    },
+    "env": {
+        "browser": true,
+        "es6": true,
+        "jquery": true
+      }
+}
