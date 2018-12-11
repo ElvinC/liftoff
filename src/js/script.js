@@ -1,6 +1,6 @@
-import { Vector2D as Vec2, Vector as Vec } from './vector.js';
-import { Scene } from './scene.js';
-import { Circle, Rocket } from './shapes.js';
+import { Vector2D as Vec2, Vector as Vec } from './vector';
+import { Scene } from './scene';
+import { Circle, Rocket } from './shapes';
 
 // one function for requesting animation frame
 window.requestAnimFrame = ((function animationFrame(/* callback */) {

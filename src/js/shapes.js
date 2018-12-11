@@ -1,4 +1,4 @@
-import { Vector2D as Vec2, Vector as Vec } from './vector.js';
+import { Vector2D as Vec2, Vector as Vec } from './vector';
 // import { Scene } from './scene';
 
 export class Rocket {
