@@ -40,7 +40,7 @@ let lastTime = new Date();
 function draw() {
     scene.clear();
     let thisTime = new Date();
-    console.log(thisTime.getMilliseconds() - lastTime.getMilliseconds());
+    // console.log(thisTime.getMilliseconds() - lastTime.getMilliseconds());
     lastTime = thisTime;
 
     for (let i = 0; i < spriteList.length; i++) {
@@ -66,7 +66,7 @@ function init() {
     scene.camera.zoom = 0.8;
     // scene.camera.pos.set(0, -1000);
 
-    for (let i = 0; i < 5000; i++) {
+    for (let i = 0; i < 200; i++) {
         const randX = 20000 * (Math.random() - 0.5);
         const randY = 15000 * (Math.random() - 1);
         const newBall = new Circle(randX, randY, Math.random() * 30, '#0066ff');

@@ -89,6 +89,24 @@ export class Rocket {
     }
 
     simulateFrame() {
+        const planet = new Vec2(0, 1000 + 600);
+        const rVec = Vec.sub(this.pos, planet); // from planet to rocket
+        const rLenSqrd = rVec.lengthSquared();
+        const rVecUnit = rVec.unit();
+
+
+        if (rLenSqrd < 1000 ** 2) { // collision with planet
+            const restitution = 0.0;
+            const changeVel = rVecUnit.multiply((1 + restitution) * Math.abs(rVecUnit.dot(this.vel)));
+            this.vel.addInPlace(changeVel);
+
+            // find delta and move to prevent intersect
+            const rVecToSurface = rVecUnit.multiply(1000);
+            const deltaToSurface = Vec.sub(rVecToSurface, rVec).multiply(2);
+            this.pos.addInPlace(deltaToSurface);
+        }
+
+
         // update angle
         this.angularVel += this.angularAcc;
         this.angle += this.angularVel;
@@ -111,11 +129,8 @@ export class Rocket {
 
         // gravity
         // sumForces.y += 0.05;
-        const planet = new Vec2(0, 1000 + 600);
-        const rVec = Vec.sub(planet, this.pos);
-        const rLenSqrd = rVec.lengthSquared();
         const mPlanet = 10000;
-        const gravity = rVec.unit(mPlanet / rLenSqrd);
+        const gravity = rVecUnit.multiply(-mPlanet / rLenSqrd);
         sumForces.addInPlace(gravity);
 
 
