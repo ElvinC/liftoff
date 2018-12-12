@@ -57,11 +57,15 @@ export class Scene {
     // Draw a circle with the given position, radius and color
     circle(pos, radius, color = '#000000') {
         // console.log(pos instanceof Vec2)
+        const scaledRadius = radius * this.camera.zoom;
+        if (scaledRadius < 0.7) { // don't render tiny primitives.
+            return;
+        }
         const posVec = Vec.toVector(pos);
         const newPos = this.calculateCoords(posVec);
 
         this.ctx.beginPath();
-        this.ctx.arc(newPos.x, newPos.y, radius * this.camera.zoom, 0, 2 * Math.PI, false);
+        this.ctx.arc(newPos.x, newPos.y, scaledRadius, 0, 2 * Math.PI, false);
         this.fillAndClose(color);
     }
 

@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/js/script.js",
   "scripts": {
-    "build": "webpack --config webpack.config.js"
+    "build": "webpack --config webpack.config.js",
+    "watch": "webpack --watch"
   },
   "author": "Elvin",
   "license": "MIT",

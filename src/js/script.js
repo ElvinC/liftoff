@@ -33,11 +33,15 @@ const spriteList = [];
 let scene = null;
 let glider = null;
 let planet = null;
+let lastTime = new Date();
 // const floor = null;
 
 
 function draw() {
     scene.clear();
+    let thisTime = new Date();
+    console.log(thisTime.getMilliseconds() - lastTime.getMilliseconds());
+    lastTime = thisTime;
 
     for (let i = 0; i < spriteList.length; i++) {
         scene.drawSprite(spriteList[i]);
@@ -53,7 +57,6 @@ function draw() {
     // floor.pos.x = glider.pos.x;
     $('#speed').html(Math.round(glider.vel.length()));
     $('#distance').html(Math.round(glider.pos.sub(planet.pos).length()));
-
     window.requestAnimFrame(draw);
 }
 
@@ -63,10 +66,10 @@ function init() {
     scene.camera.zoom = 0.8;
     // scene.camera.pos.set(0, -1000);
 
-    for (let i = 0; i < 300; i++) {
+    for (let i = 0; i < 5000; i++) {
         const randX = 20000 * (Math.random() - 0.5);
         const randY = 15000 * (Math.random() - 1);
-        const newBall = new Circle(randX, randY, 10, '#0066ff');
+        const newBall = new Circle(randX, randY, Math.random() * 30, '#0066ff');
         spriteList.push(newBall);
     }
 
