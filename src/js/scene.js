@@ -43,12 +43,14 @@ export class Scene {
         return newPos;
     }
 
-    fillAndClose(color) {
+    fillAndClose(color, stroke=false) {
         this.ctx.fillStyle = color;
         this.ctx.fill();
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeStyle = '#555';
-        this.ctx.stroke();
+        if (stroke) {
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeStyle = '#555';
+            this.ctx.stroke();
+        }
         this.ctx.closePath();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
@@ -77,8 +79,9 @@ export class Scene {
      * @param {Number} rotation Angle
      * @param {String} color Hex color
      * @param {Vec2} offset Drawing offset
+     * @param {Boolean} stroke Draw stroke
      */
-    rect(pos, width, height, rotation = 0, color = '#000000', offset) {
+    rect(pos, width, height, rotation = 0, color = '#000000', offset, stroke = false) {
         const newPos = this.calculateCoords(pos);
 
         const newWidth = width * this.camera.zoom;
@@ -96,7 +99,17 @@ export class Scene {
             this.ctx.rect(-newWidth / 2, -newHeight / 2, newWidth, newHeight);
         }
 
-        this.fillAndClose(color);
+        this.fillAndClose(color, stroke);
+    }
+
+    circleGradient(pos, startRadius, stopRadius, startColor = "rgba(170, 170, 255, 0.6)", stopColor = "rgba(255, 255, 255, 0)") {
+        const newPos = this.calculateCoords(pos);
+        const newStartRadius = startRadius * this.camera.zoom;
+        const newStopRadius = stopRadius * this.camera.zoom;
+        const grd = this.ctx.createRadialGradient(newPos.x, newPos.y, newStartRadius, newPos.x, newPos.y, newStopRadius);
+        grd.addColorStop(0, startColor);
+        grd.addColorStop(1, stopColor);
+        this.circle(pos, stopRadius, grd);
     }
 
     /**

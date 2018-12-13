@@ -1,6 +1,6 @@
 import { Vector2D as Vec2, Vector as Vec } from './vector';
 import { Scene } from './scene';
-import { Circle, Rocket } from './shapes';
+import { Circle, Rocket, Planet} from './shapes';
 
 // one function for requesting animation frame
 window.requestAnimFrame = ((function animationFrame(/* callback */) {
@@ -33,15 +33,11 @@ const spriteList = [];
 let scene = null;
 let glider = null;
 let planet = null;
-let lastTime = new Date();
 // const floor = null;
 
 
 function draw() {
     scene.clear();
-    let thisTime = new Date();
-    // console.log(thisTime.getMilliseconds() - lastTime.getMilliseconds());
-    lastTime = thisTime;
 
     for (let i = 0; i < spriteList.length; i++) {
         scene.drawSprite(spriteList[i]);
@@ -66,16 +62,27 @@ function init() {
     scene.camera.zoom = 0.8;
     // scene.camera.pos.set(0, -1000);
 
-    for (let i = 0; i < 200; i++) {
-        const randX = 20000 * (Math.random() - 0.5);
-        const randY = 15000 * (Math.random() - 1);
-        const newBall = new Circle(randX, randY, Math.random() * 30, '#0066ff');
+
+    const radP = 100000;
+    planet = new Circle(0, radP + 600, radP, '#88cc99');
+    spriteList.push(planet);
+
+    for (let i = 0; i < 1000; i++) {
+        const randX = 1000000 * (Math.random() - 0.5);
+        const randY = 1000000 * (Math.random() - 0.5) + 100000+600;
+        const newBall = new Circle(randX, randY, 100 + Math.random() * 1000, '#666688');
+        spriteList.push(newBall);
+    }
+    for (let i = 0; i < 1000; i++) {
+        const randX = 1000000 * (Math.random() - 0.5);
+        const randY = 1000000 * (Math.random() - 0.5) + 100000+600;
+        const newBall = new Circle(randX, randY,  Math.random() * 400, '#778899');
         spriteList.push(newBall);
     }
 
-    const radP = 1000;
-    planet = new Circle(0, radP + 600, radP, '#00ff00');
-    spriteList.push(planet);
+    let atmPlanet = new Planet(0, radP + 600, radP, '#539bc1', 3000);
+    spriteList.push(atmPlanet);
+
 
     glider = new Rocket(new Vec2(0, 0), new Vec2(0, 0), 1, 0);
     spriteList.push(glider);

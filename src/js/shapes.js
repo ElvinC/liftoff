@@ -23,7 +23,7 @@ export class Rocket {
 
         // settings
         this.minThrust = 0;
-        this.maxThrust = 0.3;
+        this.maxThrust = 0.15;
         this.dragCoefficient = 0; // 0.00003;
 
         const _self = this;
@@ -82,27 +82,27 @@ export class Rocket {
     drawMe(scene) {
         const fireLength = this.thrust * 300;
         scene.rect(this.pos, fireLength, 3, this.angle, '#ff0000', new Vec2(-30 - fireLength / 2, 0));
-        scene.rect(this.pos, 60, 14, this.angle, '#ffffff');
+        scene.rect(this.pos, 60, 14, this.angle, '#ffffff', null, true);
 
         // draw velocity vector
         scene.drawVector(this.pos, this.vel.multiply(2));
     }
 
     simulateFrame() {
-        const planet = new Vec2(0, 1000 + 600);
+        const planet = new Vec2(0, 100000 + 600);
+        const rPlanet = 100000;
         const rVec = Vec.sub(this.pos, planet); // from planet to rocket
         const rLenSqrd = rVec.lengthSquared();
         const rVecUnit = rVec.unit();
 
-
-        if (rLenSqrd < 1000 ** 2) { // collision with planet
-            const restitution = 0.0;
+        if (rLenSqrd < rPlanet ** 2) { // collision with planet
+            const restitution = this.vel.lengthSquared() < 3 ? 0.0 : 0.3;
             const changeVel = rVecUnit.multiply((1 + restitution) * Math.abs(rVecUnit.dot(this.vel)));
             this.vel.addInPlace(changeVel);
 
             // find delta and move to prevent intersect
-            const rVecToSurface = rVecUnit.multiply(1000);
-            const deltaToSurface = Vec.sub(rVecToSurface, rVec).multiply(2);
+            const rVecToSurface = rVecUnit.multiply(rPlanet);
+            const deltaToSurface = Vec.sub(rVecToSurface, rVec).multiply(1.1);
             this.pos.addInPlace(deltaToSurface);
         }
 
@@ -129,7 +129,7 @@ export class Rocket {
 
         // gravity
         // sumForces.y += 0.05;
-        const mPlanet = 10000;
+        const mPlanet = 50000000;
         const gravity = rVecUnit.multiply(-mPlanet / rLenSqrd);
         sumForces.addInPlace(gravity);
 
@@ -149,6 +149,28 @@ export class Rocket {
         if (this.pos.x > 3000) {
             this.pos.x = -3000;
         } */
+    }
+}
+
+export class Planet {
+    constructor(x, y, radius, color = '#000000', atmosHeight, mass = 1) {
+        this.color = color;
+        this.radius = radius;
+        this.atmStart = radius;
+        this.atmEnd = radius + atmosHeight;
+        this.pos = new Vec2(x, y);
+        this.speed = new Vec2(0, 0);
+        this.mass = mass;
+        this.inv_mass = 1 / mass;
+    }
+
+    simulateFrame() {
+        //
+    }
+
+    drawMe(scene) {
+        scene.circleGradient(this.pos, this.atmStart, this.atmEnd);
+        scene.circle(this.pos, this.radius, this.color);
     }
 }
 
