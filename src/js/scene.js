@@ -25,7 +25,9 @@ export class Scene {
     }
 
     clear() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#333';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     drawSprite(sprite) {
@@ -43,7 +45,7 @@ export class Scene {
         return newPos;
     }
 
-    fillAndClose(color, stroke=false) {
+    fillAndClose(color, stroke = false) {
         this.ctx.fillStyle = color;
         this.ctx.fill();
         if (stroke) {
@@ -57,7 +59,7 @@ export class Scene {
 
 
     // Draw a circle with the given position, radius and color
-    circle(pos, radius, color = '#000000') {
+    circle(pos, radius, color = '#000000', rotation = 0, offset) {
         // console.log(pos instanceof Vec2)
         const scaledRadius = radius * this.camera.zoom;
         if (scaledRadius < 0.7) { // don't render tiny primitives.
@@ -65,9 +67,19 @@ export class Scene {
         }
         const posVec = Vec.toVector(pos);
         const newPos = this.calculateCoords(posVec);
+        this.ctx.translate(newPos.x, newPos.y);
 
         this.ctx.beginPath();
-        this.ctx.arc(newPos.x, newPos.y, scaledRadius, 0, 2 * Math.PI, false);
+
+        // with offset
+        if (offset) { // with offset
+            this.ctx.rotate(rotation);
+            const scaledOffset = offset.multiply(this.camera.zoom);
+            this.ctx.arc(scaledOffset.x, scaledOffset.y, scaledRadius, 0, 2 * Math.PI, false);
+        } else {
+            this.ctx.arc(0, 0, scaledRadius, 0, 2 * Math.PI, false);
+        }
+
         this.fillAndClose(color);
     }
 
@@ -102,11 +114,11 @@ export class Scene {
         this.fillAndClose(color, stroke);
     }
 
-    circleGradient(pos, startRadius, stopRadius, startColor = "rgba(170, 170, 255, 0.6)", stopColor = "rgba(255, 255, 255, 0)") {
-        const newPos = this.calculateCoords(pos);
+    circleGradient(pos, startRadius, stopRadius, startColor = 'rgba(170, 170, 255, 0.6)', stopColor = 'rgba(255, 255, 255, 0)') {
+        // const newPos = this.calculateCoords(pos);
         const newStartRadius = startRadius * this.camera.zoom;
         const newStopRadius = stopRadius * this.camera.zoom;
-        const grd = this.ctx.createRadialGradient(newPos.x, newPos.y, newStartRadius, newPos.x, newPos.y, newStopRadius);
+        const grd = this.ctx.createRadialGradient(0, 0, newStartRadius, 0, 0, newStopRadius);
         grd.addColorStop(0, startColor);
         grd.addColorStop(1, stopColor);
         this.circle(pos, stopRadius, grd);
@@ -117,17 +129,20 @@ export class Scene {
      * @param {Vec2} pos start of vector
      * @param {Vec2} theVector
      */
-    drawVector(pos, theVector) {
+    drawVector(pos, theVector, width = 0.5, scaling = 1) {
         // draw a dot, center of mass.
-        this.circle(pos, 1, '#000000');
+        this.circle(pos, width * 1.5 * scaling, '#88f');
         const newStart = this.calculateCoords(pos);
-        const newStop = this.calculateCoords(Vec.add(pos, theVector));
+        const vecEnd = Vec.add(pos, theVector.multiply(scaling));
+        const newStop = this.calculateCoords(vecEnd);
 
         this.ctx.beginPath();
         this.ctx.moveTo(newStart.x, newStart.y);
         this.ctx.lineTo(newStop.x, newStop.y);
-        this.ctx.lineWidth = 1;
-        this.ctx.strokeStyle = '#555';
+        this.ctx.lineWidth = width * this.camera.zoom * scaling;
+        this.ctx.strokeStyle = '#88f';
         this.ctx.stroke();
+
+        this.circle(vecEnd, width * 0.6 * scaling, '#88f');
     }
 }

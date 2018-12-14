@@ -1,3 +1,7 @@
+* {
+    font-family: sans-serif;
+}
+
 #canvas {
     border: 1px solid #000000;
 }
@@ -12,8 +16,18 @@ body {
     font-size: 22px;
     top: 20px;
     left: 20px;
-    width: 120px;
+    width: 200px;
     padding: 40px;
     background-color: rgba(0, 0, 0, 0.4);
     color: #fff;
+}
+
+#crash {
+    font-size: 42px;
+    color: #f66;
+    text-align: center;
+    position: fixed;
+    top: 50px;
+    left: 0px;
+    width: 100%;
 }

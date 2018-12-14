@@ -1,3 +1,4 @@
+import { ENGINE_METHOD_NONE } from "constants";
 
 export class Vector2D {
     constructor(x, y) {
@@ -102,4 +103,13 @@ export const Vector = {
     unit(angle, length = 1) {
         return new Vector2D(length * Math.cos(angle), length * Math.sin(angle));
     },
+
+    /**
+     * Return z-component of cross product.
+     * @param {Vector2} a First vector
+     * @param {Vector2} b Second vector
+     */
+    cross(a, b) {
+        // TODO
+    }
 };
