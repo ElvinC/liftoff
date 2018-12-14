@@ -1,4 +1,7 @@
-import { Vector2D as Vec2, Vector as Vec } from '../vector';
+import { Vec2, Vector as Vec } from '../vector';
+import { ellipticalOrbit } from '../Shapes/ellipticalOrbit';
+
+// import { Scene } from '../scene';
 
 export class Rocket {
     /**
@@ -10,6 +13,7 @@ export class Rocket {
      * @param {Array} planetList a list of planets
      */
     constructor(pos, vel, mass, angle, planetList) {
+        // dynamics
         this.pos = Vec.toVector(pos);
         this.vel = Vec.toVector(vel);
         this.acc = new Vec2(0, 0);
@@ -21,6 +25,9 @@ export class Rocket {
         this.angularVel = 0;
         this.angularAcc = 0;
         this.eccentricity = 0;
+
+        this.rocketHeight = 1.8;
+        this.rocketWidth = 0.6;
 
         // main planet
         this.planetList = planetList;
@@ -87,32 +94,27 @@ export class Rocket {
      */
     drawMe(scene) {
         const planet = this.planetList[0];
-        const stdGrvParam = planet.mass * this.gConstant;
-        const posVec = this.pos.sub(planet.pos);
-        // draw predicted path
-        const velSqrd = this.vel.lengthSquared();
 
-        const eVec = Vec.sub(posVec.multiply((velSqrd / stdGrvParam) - (1 / posVec.length())), this.vel.multiply(Vec.dot(posVec, this.vel) / stdGrvParam));
-        // console.log(eVec.length());
-        this.eccentricity = eVec.length();
+        // DRAW PREDICTED PATH
+        const drawOrbit = scene.camera.zoom < 15;
+        this.eccentricity = ellipticalOrbit(this, planet, this.gConstant, scene, drawOrbit).eccentricity;
 
-
-        const rocketHeight = 1.8;
-        const rocketWidth = 0.6;
+        // Draw fire first
         const randAngle = (Math.random() - 0.5) * 0.02;
         const fireLength = this.thrust / this.maxThrust * 1 - 0.05 * Math.random();
-        scene.rect(this.pos, fireLength, 0.2, this.angle + randAngle, '#fd753daa', new Vec2(-(rocketHeight / 2) - fireLength / 2, 0)); // fire
-        scene.rect(this.pos, rocketHeight, rocketWidth, this.angle, '#ffffff', null, false);
-        // scene.rect(this.pos, rocketHeight / 2, rocketWidth, this.angle, '#ffffff', new Vec2(rocketHeight / 1.5, 0), false); // cap
-        scene.circle(this.pos, rocketWidth / 2, '#ffffff', this.angle, new Vec2(rocketHeight / 2, 0));
+        const fireOffset = new Vec2(-(this.rocketHeight / 2) - fireLength / 2, 0);
+        scene.rect(this.pos, fireLength, 0.2, this.angle + randAngle, '#fd753daa', fireOffset);
+
+        // draw rocket body
+        scene.rect(this.pos, this.rocketHeight, this.rocketWidth, this.angle, '#ffffff', null, false);
+        scene.circle(this.pos, this.rocketWidth / 2, '#ffffff', this.angle, new Vec2(this.rocketHeight / 2, 0));
 
         // draw velocity vector
-        // if zoomed out
-        if (scene.camera.zoom < 1.5) {
+        if (scene.camera.zoom < 1.5) { // if zoomed out
             scene.drawVector(this.pos, this.vel, 2, 0.5 / scene.camera.zoom);
             scene.circle(this.pos, 2 / scene.camera.zoom, '#ffffff');
         } else {
-            scene.drawVector(this.pos, this.vel, 0.06, 1);
+            scene.drawVector(this.pos, this.vel, 0.2, 0.25);
         }
     }
 
@@ -130,7 +132,7 @@ export class Rocket {
         if (rLenSqrd < planet.radius ** 2) { // collision with planet
             const velLength = this.vel.length();
             if (velLength > 1) { // show crash
-                $('#crash').html('CRASHED AT ' + Math.round(velLength) + ' px/s');
+                $('#crash').html(`CRASHED AT ${Math.round(velLength)} px/s`);
                 window.setTimeout(() => {
                     $('#crash').html('');
                 }, 5000);

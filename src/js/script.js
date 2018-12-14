@@ -1,6 +1,7 @@
-import { Vector2D as Vec2, Vector as Vec } from './vector';
+import { Vec2, Vector as Vec } from './vector';
 import { Scene } from './scene';
-import { Circle, Planet } from './shapes';
+import { Circle } from './shapes';
+import { Planet } from './sprites/planet';
 import { Rocket } from './sprites/rocket';
 
 window.stepSize = 1 / 60;
@@ -32,15 +33,34 @@ function drawObjects(objList, context) {
 */
 
 const spriteList = [];
+const trailList = [];
 const planetList = [];
 
 let scene = null;
 let glider = null;
+
+let counter = 0;
 // const floor = null;
 
 
 function draw() {
+    counter += 1;
     scene.clear();
+
+    if (counter % 5 === 0) {
+        trailList.push(new Circle(glider.pos.x, glider.pos.y, 0.1, '#ffffff77', 0, 0));
+        trailList[1].color = '#ffffff11';
+        trailList[2].color = '#ffffff22';
+        trailList[3].color = '#ffffff33';
+        trailList[4].color = '#ffffff44';
+        trailList[5].color = '#ffffff55';
+        trailList[6].color = '#ffffff66';
+        trailList.shift();
+    }
+
+    for (let i = 0; i < trailList.length; i++) {
+        scene.drawSprite(trailList[i]);
+    }
 
     for (let i = 0; i < spriteList.length; i++) {
         scene.drawSprite(spriteList[i]);
@@ -55,7 +75,7 @@ function draw() {
     // move 'ground' to player's x-coordinates
     // floor.pos.x = glider.pos.x;
     $('#speed').html(Math.round(glider.vel.length()));
-    $('#distance').html(Math.round((glider.pos.sub(planetList[0].pos).length() - 20000) * 100) / 100);
+    $('#distance').html(Math.round((glider.pos.sub(planetList[0].pos).length() - planetList[0].radius) * 100) / 100);
     $('#ecc').html(Math.round(glider.eccentricity * 100) / 100);
     window.requestAnimFrame(draw);
 }
@@ -89,6 +109,10 @@ function init() {
 
     glider = new Rocket(new Vec2(0, 0), new Vec2(0, 0), 1000, -Math.PI / 2, planetList);
     spriteList.push(glider);
+
+    for (let i = 0; i < 20; i++) {
+        trailList.push(new Circle(glider.pos.x, glider.pos.y, 0.1, '#ffffff77', 0, 0));
+    }
 
     // floor = new Rectangle(0, 620, 10000, 20, 0, '#333333', 0, 0);
     // spriteList.push(floor);
