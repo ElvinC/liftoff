@@ -1,6 +1,5 @@
-import { Vec2, Vector as Vec} from '../vector';
-import { Scene } from '../scene';
-import { EEXIST } from 'constants';
+import { Vector as Vec } from '../vector';
+// import { Scene } from '../scene';
 
 /**
  * Draw an elliptical orbit
@@ -19,9 +18,9 @@ export function ellipticalOrbit(bodyA, bodyB, gConstant, scene, drawOrbit, opaci
     const rLen = rVec.length();
 
     // orbital velocity vector, relative velocity
-    const orbVel = bodyA.vel.sub(bodyB.vel)
+    const orbVel = bodyA.vel.sub(bodyB.vel);
     const velSqrd = orbVel.lengthSquared();
-    const rDotVel = Vec.dot(rVec, orbVel)
+    const rDotVel = Vec.dot(rVec, orbVel);
 
     // find eccentricity vector, https://en.wikipedia.org/wiki/Eccentricity_vector
     let eccVec = rVec.multiply((velSqrd / GMb) - (1 / rLen));
@@ -29,7 +28,6 @@ export function ellipticalOrbit(bodyA, bodyB, gConstant, scene, drawOrbit, opaci
     eccVec = eccVec.sub(orbVel.multiply(rDotVel / GMb));
 
     const eccentricity = eccVec.length();
-
 
     // find angular momentum https://en.wikipedia.org/wiki/Angular_momentum
     const RPerpA = Vec.perp(rVec, orbVel);
@@ -41,7 +39,7 @@ export function ellipticalOrbit(bodyA, bodyB, gConstant, scene, drawOrbit, opaci
     // find true anomaly https://en.wikipedia.org/wiki/True_anomaly
     const eccDotR = eccVec.dot(rVec);
 
-    let trueAnomaly = Math.acos( eccDotR / (eccentricity * rLen));
+    let trueAnomaly = Math.acos(eccDotR / (eccentricity * rLen));
 
     if (rDotVel < 0) {
         trueAnomaly = 2 * Math.PI - trueAnomaly;
@@ -68,8 +66,6 @@ export function ellipticalOrbit(bodyA, bodyB, gConstant, scene, drawOrbit, opaci
     const periapsisPos = centerOfEllipse.add(semiMajorAxisVec);
     const apoapsisPos = centerOfEllipse.sub(semiMajorAxisVec);
 
-
-
     if (drawOrbit) {
         scene.ellipse({
             pos: centerOfEllipse,
@@ -82,11 +78,10 @@ export function ellipticalOrbit(bodyA, bodyB, gConstant, scene, drawOrbit, opaci
         });
 
         // draw periapsis
-        console.log(eccentricity)
         if (eccentricity < 0.9999) {
             const dotSize = Math.min(10 / scene.camera.zoom, 200);
-            scene.circle(periapsisPos, dotSize, "#ff777799");
-            scene.circle(apoapsisPos, dotSize, "#7777ff99");
+            scene.circle(periapsisPos, dotSize, '#ff777799');
+            scene.circle(apoapsisPos, dotSize, '#7777ff99');
         }
     }
 

@@ -24,7 +24,12 @@ export class Rocket {
         this.angle = angle;
         this.angularVel = 0;
         this.angularAcc = 0;
-        this.eccentricity = 0;
+        this.orbitalParams = {
+            trueAnomaly: 0,
+            eccentricity: 0,
+            periapsis: 0,
+            apoapsis: 0,
+        };
 
         this.rocketHeight = 1.8;
         this.rocketWidth = 0.6;
@@ -97,13 +102,17 @@ export class Rocket {
 
         // DRAW PREDICTED PATH
         const drawOrbit = scene.camera.zoom < 15;
-        this.eccentricity = ellipticalOrbit(this, planet, this.gConstant, scene, drawOrbit).eccentricity;
+        this.orbitalParams = ellipticalOrbit(this, planet, this.gConstant, scene, drawOrbit);
 
         // Draw fire first
-        const randAngle = (Math.random() - 0.5) * 0.02;
-        const fireLength = this.thrust / this.maxThrust * 1 - 0.05 * Math.random();
-        const fireOffset = new Vec2(-(this.rocketHeight / 2) - fireLength / 2, 0);
+        let randAngle = (Math.random() - 0.5) * 0.02;
+        let fireLength = this.thrust / this.maxThrust * 1 - 0.05 * Math.random();
+        let fireOffset = new Vec2(-(this.rocketHeight / 2) - fireLength / 2, 0);
         scene.rect(this.pos, fireLength, 0.2, this.angle + randAngle, '#fd753daa', fireOffset);
+        randAngle = (Math.random() - 0.5) * 0.05;
+        fireLength = this.thrust / this.maxThrust * 0.6 - 0.08 * Math.random();
+        fireOffset = new Vec2(-(this.rocketHeight / 2) - fireLength / 2, 0);
+        scene.rect(this.pos, fireLength, 0.1, this.angle + randAngle, '#ffd97677', fireOffset);
 
         // draw rocket body
         scene.rect(this.pos, this.rocketHeight, this.rocketWidth, this.angle, '#ffffff', null, false);
@@ -182,16 +191,5 @@ export class Rocket {
 
         this.pos.addInPlace(Vec.add(this.vel.multiply(dt), newAccDt.multiply(dt)));
         this.vel.addInPlace(newAccDt); // update velocity
-
-
-        // bounce
-        /*
-        if (this.pos.y > 600) {
-            this.vel.y = -Math.abs(this.vel.y) * 0.2
-            this.pos.y = 600;
-        } *//*
-        if (this.pos.x > 3000) {
-            this.pos.x = -3000;
-        } */
     }
 }

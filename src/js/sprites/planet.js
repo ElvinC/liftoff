@@ -13,7 +13,7 @@ export class Planet {
     }
 
     simulateFrame() {
-        return this;
+        //
     }
 
     drawMe(scene) {

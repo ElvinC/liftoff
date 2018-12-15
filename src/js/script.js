@@ -74,9 +74,13 @@ function draw() {
 
     // move 'ground' to player's x-coordinates
     // floor.pos.x = glider.pos.x;
+    const pRad = planetList[0].radius;
     $('#speed').html(Math.round(glider.vel.length()));
     $('#distance').html(Math.round((glider.pos.sub(planetList[0].pos).length() - planetList[0].radius) * 100) / 100);
-    $('#ecc').html(Math.round(glider.eccentricity * 100) / 100);
+    $('#eccentricity').html(Math.round(glider.orbitalParams.eccentricity * 100) / 100);
+    $('#apoapsis').html(Math.round((glider.orbitalParams.apoapsis - pRad) * 100) / 100);
+    $('#periapsis').html(Math.round((glider.orbitalParams.periapsis - pRad) * 100) / 100);
+    $('#trueAnomaly').html(Math.round(glider.orbitalParams.trueAnomaly * 100) / 100);
     window.requestAnimFrame(draw);
 }
 
@@ -85,6 +89,10 @@ function init() {
     window.scene = scene;
     scene.camera.zoom = 8;
     // scene.camera.pos.set(0, -1000);
+
+    $('#simSpeed').change(() => {
+        window.stepSize = $('#simSpeed').val() / 60;
+    });
 
 
     const radP = 25000;
