@@ -19,7 +19,8 @@ export class Vec2 {
      * @returns {Vec2}
      */
     length() {
-        return Math.hypot(this.x, this.y);
+        return Math.sqrt((this.x ** 2) + (this.y ** 2));
+        // return Math.hypot(this.x, this.y); // slightly slower in chrome
     }
 
     /**

@@ -125,6 +125,7 @@ function init() {
     const newEngine = engineFromPreset('merlin1D', 'f9stage1', 9, false);
     //  // mass of F9FT: 549054
     mainRocket = new Rocket(new Vec2(0, 0), new Vec2(0, 0), 400000, -Math.PI / 2, planetList, newEngine);
+    window.rocket = mainRocket; // for debugging
     spriteList.push(mainRocket);
 
     for (let i = 0; i < 20; i++) {

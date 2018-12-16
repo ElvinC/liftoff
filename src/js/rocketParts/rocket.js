@@ -40,7 +40,7 @@ export class Rocket {
         this.planetList = planetList;
 
         // settings
-        this.dragCoefficient = 0.03; // not based on anything
+        this.dragCoefficient = 0.04; // not based on anything
 
         const _self = this;
         $(window).keydown((e) => {
@@ -104,16 +104,24 @@ export class Rocket {
 
         // Draw fire first
         let randAngle = (Math.random() - 0.5) * 0.01;
-        let fireLength = this.engine.thrust / this.engine.maxThrust * 20 - 0.5 * Math.random();
+        let fireLength = this.engine.thrust / this.engine.maxThrust * 40 - 0.5 * Math.random();
         let fireOffset = new Vec2(-(this.rocketHeight / 2) - fireLength / 2, 0);
-        scene.rect(this.pos, fireLength, 2, this.angle + randAngle, '#fd753daa', fireOffset);
-        randAngle = (Math.random() - 0.5) * 0.005;
-        fireLength = this.engine.thrust / this.engine.maxThrust * 10 - 0.1 * Math.random();
-        fireOffset = new Vec2(-(this.rocketHeight / 2) - fireLength / 2, 0);
-        scene.rect(this.pos, fireLength, 1, this.angle + randAngle, '#ffd97677', fireOffset);
 
+        scene.ctx.shadowColor = '#fd753d';
+        scene.ctx.shadowBlur = 40;
+        scene.rect(this.pos, fireLength, 2.5, this.angle + randAngle, '#fd753daa', fireOffset);
+        randAngle = (Math.random() - 0.5) * 0.005;
+        fireLength = this.engine.thrust / this.engine.maxThrust * 25 - 0.1 * Math.random();
+        fireOffset = new Vec2(-(this.rocketHeight / 2) - fireLength / 2, 0);
+
+        scene.ctx.shadowColor = '#ffd976';
+        scene.rect(this.pos, fireLength, 1.5, this.angle + randAngle, '#ffe99699', fireOffset);
+
+        scene.ctx.shadowColor = "transparent";
+        scene.ctx.shadowBlur = 0;
         // draw rocket body
         scene.rect(this.pos, this.rocketHeight, this.rocketWidth, this.angle, '#ffffff', null, false);
+        scene.rect(this.pos, 7.2, this.rocketWidth, this.angle, '#444444', new Vec2(this.rocketHeight / 5, 0), false);
         scene.circle(this.pos, this.rocketWidth / 2, '#ffffff', this.angle, new Vec2(this.rocketHeight / 2, 0));
 
         // draw velocity vector
@@ -160,8 +168,9 @@ export class Rocket {
 
         // update angle using velocity verlet
         this.angle += this.angularVel * dt + 0.5 * this.angularAcc * (dt ** 2);
+        this.angle = this.angle % (2 * Math.PI); // wrap around
         this.angularVel += this.angularAcc * dt;
-        this.angularVel *= 1 - (0.5 * dt); // dampening
+        this.angularVel *= Math.max(1 - (0.5 * dt), 0); // dampening
 
         // Update thrust
         const thrust = this.engine.getThrustAndUpdateFuel(dt);
@@ -170,11 +179,10 @@ export class Rocket {
 
         // FORCES
         const sumForces = new Vec2(0, 0);
-
         // Thrust force
         const thrustForce = Vec.unit(this.angle, thrust); // In the radial direction
         sumForces.addInPlace(thrustForce); // add thrust force
-
+        
         // drag
         const velUnit = this.vel.unit();
 
@@ -192,15 +200,17 @@ export class Rocket {
         const gravity = rVecUnit.multiply(-this.mass * GMPlanet / rLenSqrd);
         sumForces.addInPlace(gravity);
 
-
+        
         // update position and velocity using velocity verlet
 
-        // new acceleration * timestep
-        const newAccDt = sumForces.multiply(dt / this.mass);
+        // new acceleration
+        const newAcc = sumForces.divide(this.mass);
+        this.acc = newAcc;
 
-        $('#acceleration').html(Math.round(newAccDt.length() / dt * 100) / 100);
+        $('#acceleration').html(Math.round(newAcc.length() * 100) / 100);
+        $('#deltaV').html(Math.round(this.engine.deltaV * 100) / 100);
 
-        this.pos.addInPlace(Vec.add(this.vel.multiply(dt), newAccDt.multiply(dt)));
-        this.vel.addInPlace(newAccDt); // update velocity
+        this.pos.addInPlace(Vec.add(this.vel.multiply(dt), newAcc.multiply(0.5 * (dt ** 2))));
+        this.vel.addInPlace(newAcc.multiply(dt)); // update velocity
     }
 }

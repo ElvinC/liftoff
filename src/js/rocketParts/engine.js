@@ -14,6 +14,8 @@ export class Engine {
         this.thrustChange = 0;
         this.throttleRate = this.maxThrust * 2; // amount per second
 
+        this.deltaV = 0;
+
         // fuel tank
         this.fuelTank = fuelTank;
 
@@ -27,7 +29,8 @@ export class Engine {
      */
     setThrottle(amount) {
         // if zero, keep at zero
-        if (this.thrust !== 0) {
+        
+        if (this.thrust !== 0 || this.minThrust === 0) {
             this.thrust = Math.min(this.maxThrust, Math.max(this.minThrust, amount));
         }
 
@@ -77,6 +80,7 @@ export class Engine {
         // consume fuel
         if (!this.infiniteFuel) {
             this.fuelTank.fuel -= this.getMdot() * dt;
+            this.deltaV = this.Ve * Math.log((this.fuelTank.fuel + this.fuelTank.dryMass) / this.fuelTank.dryMass);
         }
     }
 
@@ -89,8 +93,6 @@ export class Engine {
             this.thrust = 0;
             return 0;
         }
-
-        const deltaV = this.Ve * Math.log((this.fuelTank.fuel + this.fuelTank.dryMass) / this.fuelTank.dryMass);
 
         // update thrust and consume fuel
         this.simulateFrame(dt);
