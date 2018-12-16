@@ -1,5 +1,6 @@
 import { Vec2, Vector as Vec } from '../vector';
 import { ellipticalOrbit } from '../Shapes/ellipticalOrbit';
+import { ISA } from '../physics/atmosphere';
 
 // import { Scene } from '../scene';
 
@@ -12,14 +13,13 @@ export class Rocket {
      * @param {Number} angle angle in radians
      * @param {Array} planetList a list of planets
      */
-    constructor(pos, vel, mass, angle, planetList) {
+    constructor(pos, vel, mass, angle, planetList, engine) {
         // dynamics
         this.pos = Vec.toVector(pos);
         this.vel = Vec.toVector(vel);
         this.acc = new Vec2(0, 0);
-        this.thrust = 0; // thrust in radial direction
-        this.thrustChange = 0;
 
+        // parameters
         this.mass = mass;
         this.angle = angle;
         this.angularVel = 0;
@@ -31,38 +31,36 @@ export class Rocket {
             apoapsis: 0,
         };
 
-        this.rocketHeight = 1.8;
-        this.rocketWidth = 0.6;
+        this.engine = engine;
+
+        this.rocketHeight = 71;
+        this.rocketWidth = 3.66;
 
         // main planet
         this.planetList = planetList;
 
         // settings
-        this.minThrust = 0;
-        this.maxThrust = 5000;
-        this.dragCoefficient = 0; // 0.00003;
-
-        this.gConstant = 1;
+        this.dragCoefficient = 0.03; // not based on anything
 
         const _self = this;
         $(window).keydown((e) => {
             switch (e.which) {
             // left/right
             case 37:
-                _self.angularAcc = -1;
+                _self.angularAcc = -0.2;
                 break;
 
             case 39:
-                _self.angularAcc = 1;
+                _self.angularAcc = 0.2;
                 break;
 
                 // up/down
             case 38:
-                _self.thrustChange = this.maxThrust / 50;
+                _self.engine.beginThrottleUp();
                 break;
 
             case 40:
-                _self.thrustChange = -this.maxThrust / 50;
+                _self.engine.beginThrottleDown();
                 break;
 
             default:
@@ -82,10 +80,10 @@ export class Rocket {
                 break;
                 // up/down
             case 38:
-                _self.thrustChange = 0;
+                _self.engine.throttleStop();
                 break;
             case 40:
-                _self.thrustChange = 0;
+                _self.engine.throttleStop();
                 break;
             default:
                 break;
@@ -101,18 +99,18 @@ export class Rocket {
         const planet = this.planetList[0];
 
         // DRAW PREDICTED PATH
-        const drawOrbit = scene.camera.zoom < 15;
-        this.orbitalParams = ellipticalOrbit(this, planet, this.gConstant, scene, drawOrbit);
+        const drawOrbit = scene.camera.zoom < 0.5;
+        this.orbitalParams = ellipticalOrbit(this, planet, scene, drawOrbit);
 
         // Draw fire first
-        let randAngle = (Math.random() - 0.5) * 0.02;
-        let fireLength = this.thrust / this.maxThrust * 1 - 0.05 * Math.random();
+        let randAngle = (Math.random() - 0.5) * 0.01;
+        let fireLength = this.engine.thrust / this.engine.maxThrust * 20 - 0.5 * Math.random();
         let fireOffset = new Vec2(-(this.rocketHeight / 2) - fireLength / 2, 0);
-        scene.rect(this.pos, fireLength, 0.2, this.angle + randAngle, '#fd753daa', fireOffset);
-        randAngle = (Math.random() - 0.5) * 0.05;
-        fireLength = this.thrust / this.maxThrust * 0.6 - 0.08 * Math.random();
+        scene.rect(this.pos, fireLength, 2, this.angle + randAngle, '#fd753daa', fireOffset);
+        randAngle = (Math.random() - 0.5) * 0.005;
+        fireLength = this.engine.thrust / this.engine.maxThrust * 10 - 0.1 * Math.random();
         fireOffset = new Vec2(-(this.rocketHeight / 2) - fireLength / 2, 0);
-        scene.rect(this.pos, fireLength, 0.1, this.angle + randAngle, '#ffd97677', fireOffset);
+        scene.rect(this.pos, fireLength, 1, this.angle + randAngle, '#ffd97677', fireOffset);
 
         // draw rocket body
         scene.rect(this.pos, this.rocketHeight, this.rocketWidth, this.angle, '#ffffff', null, false);
@@ -138,10 +136,13 @@ export class Rocket {
         const rLenSqrd = rVec.lengthSquared();
         const rVecUnit = rVec.unit();
 
+        // update current mass
+        this.mass = this.engine.mass + this.engine.fuelTank.fuel + this.engine.fuelTank.dryMass;
+
         if (rLenSqrd < planet.radius ** 2) { // collision with planet
             const velLength = this.vel.length();
-            if (velLength > 1) { // show crash
-                $('#crash').html(`CRASHED AT ${Math.round(velLength)} px/s`);
+            if (velLength > 4) { // show crash
+                $('#crash').html(`CRASHED AT ${Math.round(velLength)} m/s`);
                 window.setTimeout(() => {
                     $('#crash').html('');
                 }, 5000);
@@ -163,24 +164,32 @@ export class Rocket {
         this.angularVel *= 1 - (0.5 * dt); // dampening
 
         // Update thrust
-        this.thrust += this.thrustChange;
-        this.thrust = Math.min(this.maxThrust, Math.max(this.minThrust, this.thrust)); // limit
+        const thrust = this.engine.getThrustAndUpdateFuel(dt);
+
+        $('#fuel').html(Math.round(this.engine.fuelTank.fuel * 100) / 100);
 
         // FORCES
         const sumForces = new Vec2(0, 0);
 
         // Thrust force
-        const thrustForce = Vec.unit(this.angle, this.thrust); // In the radial direction
+        const thrustForce = Vec.unit(this.angle, thrust); // In the radial direction
         sumForces.addInPlace(thrustForce); // add thrust force
 
         // drag
         const velUnit = this.vel.unit();
-        const drag = velUnit.multiply(-this.vel.lengthSquared() * this.dragCoefficient); // Cd*v^2 in opposite direction
-        sumForces.addInPlace(drag);
+
+        const altitude = Math.sqrt(rLenSqrd) - planet.radius;
+        const ISAData = ISA(altitude);
+        // 1/2 rho v^2 Cd in opposite direction
+        const dynPressure = 0.5 * ISAData.density * this.vel.lengthSquared();
+        $('#dynPressure').html(Math.round(dynPressure * 100) / 100);
+        const drag = -dynPressure * this.dragCoefficient;
+        const dragVec = velUnit.multiply(drag);
+        sumForces.addInPlace(dragVec);
 
         // gravity
-        // sumForces.y += 0.05;
-        const gravity = rVecUnit.multiply(-this.gConstant * this.mass * planet.mass / rLenSqrd);
+        const GMPlanet = planet.stdGravParam || this.gConstant * planet.mass;
+        const gravity = rVecUnit.multiply(-this.mass * GMPlanet / rLenSqrd);
         sumForces.addInPlace(gravity);
 
 
@@ -188,6 +197,8 @@ export class Rocket {
 
         // new acceleration * timestep
         const newAccDt = sumForces.multiply(dt / this.mass);
+
+        $('#acceleration').html(Math.round(newAccDt.length() / dt * 100) / 100);
 
         this.pos.addInPlace(Vec.add(this.vel.multiply(dt), newAccDt.multiply(dt)));
         this.vel.addInPlace(newAccDt); // update velocity

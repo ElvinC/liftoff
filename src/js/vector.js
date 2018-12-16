@@ -75,10 +75,6 @@ export class Vec2 {
         return Math.atan2(this.y, this.x);
     }
 
-    print() {
-        console.log(`${this.x}, ${this.y}`);
-    }
-
     containsNaN() {
         return Number.isNaN(this.x) || Number.isNaN(this.y);
     }

@@ -1,18 +1,20 @@
 import { Vector as Vec } from '../vector';
+import { GRAVITATIONAL_CONSTANT } from '../physics/constants';
 // import { Scene } from '../scene';
 
 /**
  * Draw an elliptical orbit
  * @param {*} bodyA Object with pos, mass and velocity, in motion
  * @param {*} bodyB Object with pos and mass, not in motion
- * @param {Number} gConstant Gravitational constant
  * @param {Scene} scene Scene to draw the orbit
+ * @param {Boolean} drawOrbit Draw orbit on scene
+ * @param {Number} opacity Opacity of drawn orbit
  */
-export function ellipticalOrbit(bodyA, bodyB, gConstant, scene, drawOrbit, opacity = 0.25) {
+export function ellipticalOrbit(bodyA, bodyB, scene, drawOrbit, opacity = 0.25) {
     // body A is in motion, body B is stationary
 
     // calculate useful values
-    const GMb = bodyB.mass * gConstant;
+    const GMb = bodyB.stdGravParam || bodyB.mass * GRAVITATIONAL_CONSTANT;
     // vector from B to A
     const rVec = bodyA.pos.sub(bodyB.pos);
     const rLen = rVec.length();
@@ -78,8 +80,9 @@ export function ellipticalOrbit(bodyA, bodyB, gConstant, scene, drawOrbit, opaci
         });
 
         // draw periapsis
+        
         if (eccentricity < 0.9999) {
-            const dotSize = Math.min(10 / scene.camera.zoom, 200);
+            const dotSize = Math.min(6 / scene.camera.zoom, 50000);
             scene.circle(periapsisPos, dotSize, '#ff777799');
             scene.circle(apoapsisPos, dotSize, '#7777ff99');
         }

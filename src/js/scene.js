@@ -172,13 +172,13 @@ export class Scene {
 
         this.ctx.beginPath();
         this.ctx.translate(newPos.x, newPos.y);
-        this.ctx.rotate(rotation);
+        // this.ctx.rotate(rotation);
 
         if (offset) { // with offset
             const newOffset = offset.multiply(this.camera.zoom);
-            this.ctx.ellipse(newOffset.x, newOffset.x, newRadX, newRadY, 0, startAngle, endAngle);
+            this.ctx.ellipse(newOffset.x, newOffset.x, newRadX, newRadY, rotation, startAngle, endAngle);
         } else {
-            this.ctx.ellipse(0, 0, newRadX, newRadY, 0, startAngle, endAngle);
+            this.ctx.ellipse(0, 0, newRadX, newRadY, rotation, startAngle, endAngle);
         }
 
         this.fillAndClose(fill, color, stroke, strokeColor);
