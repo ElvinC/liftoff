@@ -1,4 +1,6 @@
 import { Vec2 } from '../vector';
+import earthImg from '../../img/earth.png';
+
 
 export class Planet {
     constructor(x, y, radius, color = '#000000', atmosHeight, mass = 1, stdGravParam) {
@@ -16,8 +18,8 @@ export class Planet {
 
         this.imgReady = false;
         this.img = document.createElement('img');
-        this.img.src = '../../earth.png';
-        let _self = this;
+        this.img.src = earthImg;
+        const _self = this;
         this.img.onload = () => {
             _self.imgReady = true;
         };
@@ -52,12 +54,11 @@ export class Planet {
             scene.circle(this.pos, this.radius, this.color);
             scene.circle(this.pos, this.radius / 200, '#00000099');
 
-            let newPos = scene.calculateCoords(this.pos);
+            const newPos = scene.calculateCoords(this.pos);
 
             if (this.imgReady) {
                 scene.ctx.drawImage(this.img, newPos.x - this.radius * scene.camera.zoom, newPos.y - this.radius * scene.camera.zoom, 2 * this.radius * scene.camera.zoom, 2 * this.radius * scene.camera.zoom);
             }
- 
         }
     }
 }
