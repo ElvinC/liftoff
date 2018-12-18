@@ -79,6 +79,10 @@ export class Vec2 {
     containsNaN() {
         return Number.isNaN(this.x) || Number.isNaN(this.y);
     }
+
+    copy() {
+        return new Vec2(this.x, this.y);
+    }
 }
 
 export const Vector = {

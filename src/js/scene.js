@@ -61,7 +61,7 @@ export class Scene {
 
 
     // Draw a circle with the given position, radius and color
-    circle(pos, radius, color = '#000000', rotation = 0, offset) {
+    circle(pos, radius, color = '#000000', rotation = 0, offset, startRadius = 0, stopRadius = 2 * Math.PI) {
         // console.log(pos instanceof Vec2)
         const scaledRadius = radius * this.camera.zoom;
         if (scaledRadius < 0.7) { // don't render tiny primitives.
@@ -77,9 +77,9 @@ export class Scene {
         if (offset) { // with offset
             this.ctx.rotate(rotation);
             const scaledOffset = offset.multiply(this.camera.zoom);
-            this.ctx.arc(scaledOffset.x, scaledOffset.y, scaledRadius, 0, 2 * Math.PI, false);
+            this.ctx.arc(scaledOffset.x, scaledOffset.y, scaledRadius, startRadius, stopRadius, false);
         } else {
-            this.ctx.arc(0, 0, scaledRadius, 0, 2 * Math.PI, false);
+            this.ctx.arc(0, 0, scaledRadius, startRadius, stopRadius, false);
         }
 
         this.fillAndClose(true, color);
@@ -139,6 +139,16 @@ export class Scene {
     }
 
     /**
+     * Change context shadow settings
+     * @param {String} color the color of the blur
+     * @param {Number} blur The blur size
+     */
+    setShadow(color = 'transparent', blur = 0) {
+        this.ctx.shadowColor = color;
+        this.ctx.shadowBlur = blur;
+    }
+
+    /**
      * Generate an ellipse
      * @param {Object} conf The settings
      * @param {Vec2} conf.pos Position vector
@@ -190,20 +200,20 @@ export class Scene {
      * @param {Vec2} pos start of vector
      * @param {Vec2} theVector
      */
-    drawVector(pos, theVector, width = 0.5, scaling = 1) {
+    drawVector(pos, theVector, width = 0.5, length = 1, color = '#ffffff') {
         // draw a dot, center of mass.
-        this.circle(pos, width * 1.5 * scaling, '#88f');
+        this.circle(pos, width * 1.5, color);
         const newStart = this.calculateCoords(pos);
-        const vecEnd = Vec.add(pos, theVector.multiply(scaling));
+        const vecEnd = Vec.add(pos, theVector.multiply(length));
         const newStop = this.calculateCoords(vecEnd);
 
         this.ctx.beginPath();
         this.ctx.moveTo(newStart.x, newStart.y);
         this.ctx.lineTo(newStop.x, newStop.y);
-        this.ctx.lineWidth = width * this.camera.zoom * scaling;
-        this.ctx.strokeStyle = '#88f';
+        this.ctx.lineWidth = width * this.camera.zoom;
+        this.ctx.strokeStyle = color;
         this.ctx.stroke();
 
-        this.circle(vecEnd, width * 0.6 * scaling, '#88f');
+        this.circle(vecEnd, width * 0.6, color);
     }
 }

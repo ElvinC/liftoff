@@ -2,7 +2,7 @@ import { STANDARD_GRAVITY } from '../physics/constants';
 // import { FuelTank } from './fuelTank';
 
 export class Engine {
-    constructor(mass, Isp, maxThrust, minThrust, numEngines, fuelTank, infiniteFuel = false, gimbalAngle = 0) {
+    constructor(mass, Isp, maxThrust, minThrust, numEngines = 1, fuelTank = 0, infiniteFuel = false, gimbalAngle = 0) {
         this.mass = mass * numEngines;
         this.Isp = Isp;
         this.maxThrust = maxThrust * numEngines;

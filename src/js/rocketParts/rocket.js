@@ -1,6 +1,7 @@
 import { Vec2, Vector as Vec } from '../vector';
 import { ellipticalOrbit } from '../Shapes/ellipticalOrbit';
 import { ISA } from '../physics/atmosphere';
+import { Stage } from './stage';
 
 // import { Scene } from '../scene';
 
@@ -18,6 +19,8 @@ export class Rocket {
         this.pos = Vec.toVector(pos);
         this.vel = Vec.toVector(vel);
         this.acc = new Vec2(0, 0);
+
+        this.dynPressure = 0;
 
         // parameters
         this.mass = mass;
@@ -42,6 +45,8 @@ export class Rocket {
         // settings
         this.dragCoefficient = 0.04; // not based on anything
 
+        this.spacePressed = false;
+
         const _self = this;
         $(window).keydown((e) => {
             switch (e.which) {
@@ -61,6 +66,16 @@ export class Rocket {
 
             case 40:
                 _self.engine.beginThrottleDown();
+                break;
+
+            case 32:
+                if (!this.spacePressed) {
+                    this.spacePressed = true;
+                    console.log("STAGING")
+                    //this.stage();
+                }
+                
+
                 break;
 
             default:
@@ -85,6 +100,8 @@ export class Rocket {
             case 40:
                 _self.engine.throttleStop();
                 break;
+            case 32:
+                this.spacePressed = false;
             default:
                 break;
             }
@@ -131,11 +148,11 @@ export class Rocket {
         } else {
             scene.drawVector(this.pos, this.vel, 0.2, 0.25);
         }
+
     }
 
     /**
      * Simulate next timestep
-     * @param {Array} interactList A list of sprite objects to interact with.
      * @param {Number} dt The simulation timestep
      */
     simulateFrame(dt) {
@@ -175,8 +192,6 @@ export class Rocket {
         // Update thrust
         const thrust = this.engine.getThrustAndUpdateFuel(dt);
 
-        $('#fuel').html(Math.round(this.engine.fuelTank.fuel * 100) / 100);
-
         // FORCES
         const sumForces = new Vec2(0, 0);
         // Thrust force
@@ -190,7 +205,8 @@ export class Rocket {
         const ISAData = ISA(altitude);
         // 1/2 rho v^2 Cd in opposite direction
         const dynPressure = 0.5 * ISAData.density * this.vel.lengthSquared();
-        $('#dynPressure').html(Math.round(dynPressure * 100) / 100);
+        this.dynPressure = dynPressure;
+
         const drag = -dynPressure * this.dragCoefficient;
         const dragVec = velUnit.multiply(drag);
         sumForces.addInPlace(dragVec);
@@ -206,9 +222,6 @@ export class Rocket {
         // new acceleration
         const newAcc = sumForces.divide(this.mass);
         this.acc = newAcc;
-
-        $('#acceleration').html(Math.round(newAcc.length() * 100) / 100);
-        $('#deltaV').html(Math.round(this.engine.deltaV * 100) / 100);
 
         this.pos.addInPlace(Vec.add(this.vel.multiply(dt), newAcc.multiply(0.5 * (dt ** 2))));
         this.vel.addInPlace(newAcc.multiply(dt)); // update velocity

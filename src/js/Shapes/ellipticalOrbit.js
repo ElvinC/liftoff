@@ -81,7 +81,7 @@ export function ellipticalOrbit(bodyA, bodyB, scene, drawOrbit, opacity = 0.25) 
 
         // draw periapsis
         
-        if (eccentricity < 0.9999) {
+        if (eccentricity < 1) {
             const dotSize = Math.min(6 / scene.camera.zoom, 50000);
             scene.circle(periapsisPos, dotSize, '#ff777799');
             scene.circle(apoapsisPos, dotSize, '#7777ff99');
