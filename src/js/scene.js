@@ -62,7 +62,6 @@ export class Scene {
 
     // Draw a circle with the given position, radius and color
     circle(pos, radius, color = '#000000', rotation = 0, offset, startRadius = 0, stopRadius = 2 * Math.PI) {
-        // console.log(pos instanceof Vec2)
         const scaledRadius = radius * this.camera.zoom;
         if (scaledRadius < 0.7) { // don't render tiny primitives.
             return;

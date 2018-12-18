@@ -11,7 +11,6 @@ export class Vec2 {
     }
 
     lengthSquared() {
-        // console.log(this.x)
         return (Math.pow(this.x, 2) + Math.pow(this.y, 2));
     }
 

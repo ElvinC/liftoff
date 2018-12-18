@@ -71,8 +71,6 @@ export class Rocket {
             case 32:
                 if (!this.spacePressed) {
                     this.spacePressed = true;
-                    console.log("STAGING")
-                    //this.stage();
                 }
                 
 

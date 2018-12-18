@@ -112,7 +112,6 @@ export class StagedRocket {
     seperateStage() {
         if (this.stages.length >= 2) {
             let droppedStage = this.stages[0];
-            console.log(this.stages[1]);
             
             // how much to move
             const shiftAmount = (droppedStage.height + this.stages[1].height) / 2;

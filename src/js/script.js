@@ -77,7 +77,7 @@ function draw(currentTime) {
     // update info
     const pRad = planetList[0].radius;
     $('#clock').html(Math.round(clock * 10) / 10);
-    $('#speed').html(Math.round(3.6 * mainRocket.vel.length()));
+    $('#speed').html(Math.round(mainRocket.vel.length()));
     $('#distance').html(Math.round((mainRocket.pos.sub(planetList[0].pos).length() - planetList[0].radius) * 100) / 100);
     $('#eccentricity').html(Math.round(mainRocket.orbitalParams.eccentricity * 100) / 100);
     $('#apoapsis').html(Math.round((mainRocket.orbitalParams.apoapsis - pRad) * 100) / 100);
