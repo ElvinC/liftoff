@@ -14,9 +14,13 @@ export class Planet {
         // G * m
         this.stdGravParam = stdGravParam;
 
-        
+        this.imgReady = false;
         this.img = document.createElement('img');
         this.img.src = '../../earth.png';
+        let _self = this;
+        this.img.onload = () => {
+            _self.imgReady = true;
+        };
     }
 
     simulateFrame(dt) {
@@ -50,7 +54,9 @@ export class Planet {
 
             let newPos = scene.calculateCoords(this.pos);
 
-            scene.ctx.drawImage(this.img, newPos.x - this.radius * scene.camera.zoom, newPos.y - this.radius * scene.camera.zoom, 2 * this.radius * scene.camera.zoom, 2 * this.radius * scene.camera.zoom);
+            if (this.imgReady) {
+                scene.ctx.drawImage(this.img, newPos.x - this.radius * scene.camera.zoom, newPos.y - this.radius * scene.camera.zoom, 2 * this.radius * scene.camera.zoom, 2 * this.radius * scene.camera.zoom);
+            }
  
         }
     }
