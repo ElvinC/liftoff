@@ -31,7 +31,7 @@ export class StagedRocket {
         };
 
         // settings
-        this.dragCoefficient = 0.05; // not based on anything
+        this.dragCoefficient = 0.04; // not based on anything
 
         this.spacePressed = false;
 

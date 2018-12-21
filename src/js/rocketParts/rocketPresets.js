@@ -23,13 +23,6 @@ export const enginePresets = {
         mass: 0,
         fireLength: 10,
     },
-    SuperDraco: {
-        Isp: 235,
-        maxThrust: 71000,
-        minThrust: 14200,
-        mass: 0,
-        fireLength: 1,
-    },
     Rutherford: {
         Isp: 303,
         maxThrust: 192000,
@@ -41,11 +34,6 @@ export const enginePresets = {
         maxThrust: 6770000,
         minThrust: 677000,
         mass: 0,
-    },
-    Raptor: {
-        Isp: 350,
-        maxThrust: 1993000,
-        minThrust: 199300,
     },
 };
 
@@ -77,7 +65,7 @@ export const fuelTankPresets = {
         width: 5.2,
     },
     Dragon: {
-        dryMass: 4200 + 6000 - 1388,
+        dryMass: 4200 + 6000,
         wetMass: 4200 + 6000,
         height: 6.1,
         width: 3.77,
