@@ -31,7 +31,7 @@ export class StagedRocket {
         };
 
         // settings
-        this.dragCoefficient = 0.04; // not based on anything
+        this.dragCoefficient = 0.05; // not based on anything
 
         this.spacePressed = false;
 
@@ -124,6 +124,9 @@ export class StagedRocket {
             this.droppedStages.push(newStageObject);
 
             this.pos.addInPlace(Vec.unit(this.angle, shiftAmount));
+        } else {
+            // parachute
+            // this.dragCoefficient = Math.min(100000, this.dragCoefficient * 5);
         }
     }
 
@@ -137,7 +140,7 @@ export class StagedRocket {
         this.updateMass();
         if (rLenSqrd < planet.radius ** 2) { // collision with planet
             const velLength = this.vel.length();
-            if (velLength > 4) { // show crash
+            if (velLength > 4 && this.focus) { // show crash
                 $('#crash').html(`CRASHED AT ${Math.round(velLength)} m/s`);
                 window.setTimeout(() => {
                     $('#crash').html('');

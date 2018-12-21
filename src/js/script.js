@@ -83,7 +83,7 @@ function draw(currentTime) {
     $('#apoapsis').html(Math.round((mainRocket.orbitalParams.apoapsis - pRad) * 100) / 100);
     $('#periapsis').html(Math.round((mainRocket.orbitalParams.periapsis - pRad) * 100) / 100);
     $('#trueAnomaly').html(Math.round(mainRocket.orbitalParams.trueAnomaly * 100) / 100);
-    $('#acceleration').html(Math.round(mainRocket.acc.length() * 100) / 100);
+    $('#acceleration').html("[g] " + Math.round(1/9.81 * mainRocket.acc.length() * 100) / 100);
     $('#deltaV').html(Math.round(mainRocket.getDeltaV() * 100) / 100);
     $('#fuel').html(Math.round(mainRocket.stages[0].fuelTank.fuel * 100) / 100);
     $('#dynPressure').html(Math.round(mainRocket.dynPressure * 100) / 100);
@@ -118,12 +118,14 @@ function init() {
     //  // mass of F9FT: 549054
     // mainRocket = new Rocket(new Vec2(0, 0), new Vec2(0, 0), 400000, -Math.PI / 2, planetList, newEngine);
 
-    const stageList = []
+    const stageList = [];
     const newStage = stageFromPreset('merlin1D', 9, 'f9stage1', 1);
     stageList.push(newStage);
     const newStage2 = stageFromPreset('Merlin1DVac', 1, 'f9stage2', 1);
     stageList.push(newStage2);
-    const fairing = stageFromPreset('NoEngine', 0, 'Dragon', 1, true);
+    const trunk = stageFromPreset('NoEngine', 0, 'DragonTrunk', 1);
+    stageList.push(trunk);
+    const fairing = stageFromPreset('SuperDraco', 8, 'Dragon', 1, true);
     stageList.push(fairing);
 
     mainRocket = new StagedRocket(new Vec2(0, 0), new Vec2(0, 0), -Math.PI / 2, stageList, planetList);
