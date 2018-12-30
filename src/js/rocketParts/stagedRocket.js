@@ -11,6 +11,7 @@ export class StagedRocket {
         this.stages = stageList;
         this.droppedStages = [];
         this.planetList = planetList;
+        this.machNumber = 0;
 
         // focus on rocket, user can control it
         this.focus = focus;
@@ -31,7 +32,9 @@ export class StagedRocket {
         };
 
         // settings
-        this.dragCoefficient = 0.05; // not based on anything
+        this.dragCoefficient = 0.15; // not based on anything
+        this.supersonicDrag = 0.4;
+        this.drag = 0;
 
         this.spacePressed = false;
 
@@ -99,6 +102,43 @@ export class StagedRocket {
         });
     }
 
+    calculateRefArea() {
+        // approximate with cylinder
+
+        // get area seen from side
+        let totalSideArea = 0;
+        let maxWidth = 0;
+        for (let i = 0; i < this.stages.length; i++) {
+            totalSideArea += this.stages[i].height * this.stages[i].width;
+            if (this.stages[i].width > maxWidth) {
+                maxWidth = this.stages[i].width;
+            }
+        }
+
+        // get cap area from maximum width
+        const capArea = (maxWidth ** 2) * Math.PI / 4;
+
+        // find angle of attack
+
+        // convert angle from 0, 2pi to -pi, pi
+        const newAngle = this.angle > Math.PI ? this.angle - 2 * Math.PI : this.angle;
+
+        // calculate angle of attack
+        let angleOfAttack = newAngle - this.vel.angle();
+        if (angleOfAttack > Math.PI) {
+            angleOfAttack -= 2 * Math.PI;
+        } else if (angleOfAttack > Math.PI) {
+            angleOfAttack += 2 * Math.PI;
+        }
+
+        // calculate reference area, side
+        let refArea = Math.abs(totalSideArea * Math.sin(angleOfAttack));
+        // "caps"
+        refArea += Math.abs(capArea * Math.cos(angleOfAttack));
+
+        return refArea;
+    }
+
     updateMass() {
         let newMass = 0;
         for (let i = 0; i < this.stages.length; i++) {
@@ -126,7 +166,7 @@ export class StagedRocket {
             this.pos.addInPlace(Vec.unit(this.angle, shiftAmount));
         } else {
             // parachute
-            // this.dragCoefficient = Math.min(100000, this.dragCoefficient * 5);
+            this.dragCoefficient = Math.min(7000, this.dragCoefficient * 5);
         }
     }
 
@@ -136,10 +176,10 @@ export class StagedRocket {
         const rVec = Vec.sub(this.pos, planet.pos); // from planet to rocket
         const rLenSqrd = rVec.lengthSquared();
         const rVecUnit = rVec.unit();
+        const velLength = this.vel.length();
 
         this.updateMass();
         if (rLenSqrd < planet.radius ** 2) { // collision with planet
-            const velLength = this.vel.length();
             if (velLength > 4 && this.focus) { // show crash
                 $('#crash').html(`CRASHED AT ${Math.round(velLength)} m/s`);
                 window.setTimeout(() => {
@@ -159,6 +199,10 @@ export class StagedRocket {
         // update angle using velocity verlet
         this.angle += this.angularVel * dt + 0.5 * this.angularAcc * (dt ** 2);
         this.angle = this.angle % (2 * Math.PI); // wrap around
+        if (this.angle < 0) {
+            this.angle += 2 * Math.PI;
+        }
+
         this.angularVel += this.angularAcc * dt;
         this.angularVel *= Math.max(1 - (0.5 * dt), 0); // dampening
 
@@ -176,14 +220,24 @@ export class StagedRocket {
         const velUnit = this.vel.unit();
 
         const altitude = Math.sqrt(rLenSqrd) - planet.radius;
-        const ISAData = ISA(altitude);
-        // 1/2 rho v^2 Cd in opposite direction
-        const dynPressure = 0.5 * ISAData.density * this.vel.lengthSquared();
-        this.dynPressure = dynPressure;
+        if (altitude < 100000) {
+            const ISAData = ISA(altitude);
+            // 1/2 rho v^2 Cd in opposite direction
+            const dynPressure = 0.5 * ISAData.density * this.vel.lengthSquared();
+            this.dynPressure = dynPressure;
+            const localSpeedOfSound = ISAData.soundSpeed === 0 ? 343 : ISAData.soundSpeed;
+            this.machNumber = velLength / localSpeedOfSound;
+            // simple & inaccurate supersonic drag modelling
+            const newCd = this.machNumber > 1 ? this.supersonicDrag : this.dragCoefficient;
 
-        const drag = -dynPressure * this.dragCoefficient;
-        const dragVec = velUnit.multiply(drag);
-        sumForces.addInPlace(dragVec);
+            const drag = -dynPressure * newCd * this.calculateRefArea();
+            this.drag = -drag;
+            const dragVec = velUnit.multiply(drag);
+            sumForces.addInPlace(dragVec);
+        } else {
+            this.machNumber = velLength / 343;
+        }
+
 
         // gravity
         const GMPlanet = planet.stdGravParam || this.gConstant * planet.mass;

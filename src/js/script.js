@@ -87,6 +87,8 @@ function draw(currentTime) {
     $('#deltaV').html(Math.round(mainRocket.getDeltaV() * 100) / 100);
     $('#fuel').html(Math.round(mainRocket.stages[0].fuelTank.fuel * 100) / 100);
     $('#dynPressure').html(Math.round(mainRocket.dynPressure * 100) / 100);
+    $('#drag').html(Math.round(mainRocket.drag * 100) / 100);
+    $('#mach').html(Math.round(mainRocket.machNumber * 100) / 100);
     window.requestAnimFrame(draw);
 }
 

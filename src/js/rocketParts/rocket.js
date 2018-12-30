@@ -146,7 +146,6 @@ export class Rocket {
         } else {
             scene.drawVector(this.pos, this.vel, 0.2, 0.25);
         }
-
     }
 
     /**
