@@ -76,19 +76,20 @@ function draw(currentTime) {
 
     // update info
     const pRad = planetList[0].radius;
+    const focusStage = mainRocket.getFocusStage();
     $('#clock').html(Math.round(clock * 10) / 10);
-    $('#speed').html(Math.round(mainRocket.vel.length()));
-    $('#distance').html(Math.round((mainRocket.pos.sub(planetList[0].pos).length() - planetList[0].radius) * 100) / 100);
-    $('#eccentricity').html(Math.round(mainRocket.orbitalParams.eccentricity * 100) / 100);
-    $('#apoapsis').html(Math.round((mainRocket.orbitalParams.apoapsis - pRad) * 100) / 100);
-    $('#periapsis').html(Math.round((mainRocket.orbitalParams.periapsis - pRad) * 100) / 100);
-    $('#trueAnomaly').html(Math.round(mainRocket.orbitalParams.trueAnomaly * 100) / 100);
-    $('#acceleration').html("[g] " + Math.round(1/9.81 * mainRocket.acc.length() * 100) / 100);
-    $('#deltaV').html(Math.round(mainRocket.getDeltaV() * 100) / 100);
-    $('#fuel').html(Math.round(mainRocket.stages[0].fuelTank.fuel * 100) / 100);
-    $('#dynPressure').html(Math.round(mainRocket.dynPressure * 100) / 100);
-    $('#drag').html(Math.round(mainRocket.drag * 100) / 100);
-    $('#mach').html(Math.round(mainRocket.machNumber * 100) / 100);
+    $('#speed').html(Math.round(focusStage.vel.length()));
+    $('#distance').html(Math.round((focusStage.pos.sub(planetList[0].pos).length() - planetList[0].radius) * 100) / 100);
+    $('#eccentricity').html(Math.round(focusStage.orbitalParams.eccentricity * 100) / 100);
+    $('#apoapsis').html(Math.round((focusStage.orbitalParams.apoapsis - pRad) * 100) / 100);
+    $('#periapsis').html(Math.round((focusStage.orbitalParams.periapsis - pRad) * 100) / 100);
+    $('#trueAnomaly').html(Math.round(focusStage.orbitalParams.trueAnomaly * 100) / 100);
+    $('#acceleration').html("[g] " + Math.round(1/9.81 * focusStage.acc.length() * 100) / 100);
+    $('#deltaV').html(Math.round(focusStage.getDeltaV() * 100) / 100);
+    $('#fuel').html(Math.round(focusStage.stages[0].fuelTank.fuel * 100) / 100);
+    $('#dynPressure').html(Math.round(focusStage.dynPressure * 100) / 100);
+    $('#drag').html(Math.round(focusStage.drag * 100) / 100);
+    $('#mach').html(Math.round(focusStage.machNumber * 100) / 100);
     window.requestAnimFrame(draw);
 }
 

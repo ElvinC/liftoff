@@ -33,6 +33,8 @@ export function ellipticalOrbit(bodyA, bodyB, scene, drawOrbit, opacity = 0.25) 
 
     // find angular momentum https://en.wikipedia.org/wiki/Angular_momentum
     const RPerpA = Vec.perp(rVec, orbVel);
+
+
     // const horizontalVel = RPerpA / rLen;
     // const angularVel = RPerpA / (rLen ** 2);
     // const angularMomentum = (rLen ** 2) * angularVel
@@ -80,7 +82,7 @@ export function ellipticalOrbit(bodyA, bodyB, scene, drawOrbit, opacity = 0.25) 
         });
 
         // draw periapsis
-        
+
         if (eccentricity < 1) {
             const dotSize = Math.min(6 / scene.camera.zoom, 50000);
             scene.circle(periapsisPos, dotSize, '#ff777799');
