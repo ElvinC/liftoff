@@ -55,9 +55,9 @@ function update() {
     // increment time counter
     clock += window.stepSize;
 
-    // move camera towards player
+    // move camera towards stage in focus
     const cameraSmooth = Math.min(0.04 + mainRocket.vel.length() / 600, 1);
-    const Delta = Vec.sub(mainRocket.pos, scene.camera.pos);
+    const Delta = Vec.sub(mainRocket.getFocusStage().pos, scene.camera.pos);
     scene.camera.pos.addInPlace(Delta.multiply(cameraSmooth));
 }
 

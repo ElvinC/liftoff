@@ -3,18 +3,21 @@ import { ellipticalOrbit } from '../Shapes/ellipticalOrbit';
 import { ISA } from '../physics/atmosphere';
 
 export class StagedRocket {
-    constructor(pos, vel, angle, stageList, planetList, focus = true) {
+    constructor(pos, vel, angle, stageList, planetList, isParent = true) {
         this.pos = pos;
         this.vel = vel;
         this.angle = angle;
         this.acc = new Vec2(0, 0);
         this.stages = stageList;
+
+        this.focusId = 0; // 0 is itself, 1, 2.. for dropped stages
         this.droppedStages = [];
         this.planetList = planetList;
         this.machNumber = 0;
 
         // focus on rocket, user can control it
-        this.focus = focus;
+        this.focus = isParent;
+        this.isParent = isParent;
 
         this.mass = 1;
 
@@ -39,6 +42,20 @@ export class StagedRocket {
         this.spacePressed = false;
 
         const _self = this;
+
+        if (this.isParent) {
+            $(window).keydown((e) => {
+                switch (e.which) {
+                case 67:
+                    this.changeFocus();
+                    break;
+
+                default:
+                    break;
+                }
+            });
+        }
+
         $(window).keydown((e) => {
             if (this.focus) {
                 switch (e.which) {
@@ -46,33 +63,33 @@ export class StagedRocket {
                 case 37:
                     _self.angularAcc = -0.2;
                     break;
-    
+
                 case 39:
                     _self.angularAcc = 0.2;
                     break;
-    
+
                     // up/down
                 case 38:
                     _self.stages[0].engine.beginThrottleUp();
                     break;
-    
+
                 case 40:
                     _self.stages[0].engine.beginThrottleDown();
                     break;
-    
+
                 case 32:
                     if (!this.spacePressed) {
                         this.spacePressed = true;
                         this.seperateStage();
                     }
                     break;
-        
+
                 default:
                     break;
                 }
             }
-
         });
+
 
         $(window).keyup((e) => {
             if (this.focus) {
@@ -81,7 +98,7 @@ export class StagedRocket {
                 case 37:
                     _self.angularAcc = 0;
                     break;
-    
+
                 case 39:
                     _self.angularAcc = 0;
                     break;
@@ -100,6 +117,44 @@ export class StagedRocket {
                 }
             }
         });
+    }
+
+    getFocusStage() {
+        if (this.focus) {
+            return this;
+        }
+
+        for (let i = 0; i < this.droppedStages.length; i++) {
+            if (this.droppedStages[i].focus) {
+                return this.droppedStages[i];
+            }
+        }
+        return new Vec2(0, 0);
+    }
+
+    changeFocus() {
+        if (this.isParent) {
+            const numDropped = this.droppedStages.length;
+
+            if (numDropped === 0) {
+                // no dropped stages
+                return;
+            }
+
+            if (this.focus) {
+                this.focus = false;
+            } else {
+                this.droppedStages[this.focusId - 1].focus = false;
+            }
+
+            this.focusId = (this.focusId + 1) % (this.droppedStages.length + 1);
+
+            if (this.focusId === 0) {
+                this.focus = true;
+            } else {
+                this.droppedStages[this.focusId - 1].focus = true;
+            }
+        }
     }
 
     calculateRefArea() {
@@ -151,16 +206,16 @@ export class StagedRocket {
 
     seperateStage() {
         if (this.stages.length >= 2) {
-            let droppedStage = this.stages[0];
-            
+            const droppedStage = this.stages[0];
+
             // how much to move
             const shiftAmount = (droppedStage.height + this.stages[1].height) / 2;
 
             this.stages.shift(); // remove current stage
-            
+
             const nPos = this.pos.copy();
             const nVel = this.vel.add(Vec.unit(this.angle, -2)); // push it a little
-            let newStageObject = new StagedRocket(nPos, nVel, this.angle, [droppedStage], this.planetList, false);
+            const newStageObject = new StagedRocket(nPos, nVel, this.angle, [droppedStage], this.planetList, false);
             this.droppedStages.push(newStageObject);
 
             this.pos.addInPlace(Vec.unit(this.angle, shiftAmount));
@@ -172,7 +227,7 @@ export class StagedRocket {
 
     simulateFrame(dt) {
         const planet = this.planetList[0];
-        
+
         const rVec = Vec.sub(this.pos, planet.pos); // from planet to rocket
         const rLenSqrd = rVec.lengthSquared();
         const rVecUnit = rVec.unit();
@@ -270,7 +325,7 @@ export class StagedRocket {
 
         // let offset = new Vec2(0, 0);
         const offset = new Vec2(0, 0); // offset based on dynamic pressure
-        const shakePos = Vec.add(this.pos, Vec.unit(Math.random() * 2 * Math.PI, 0.0003 * Math.sqrt(this.dynPressure)))
+        const shakePos = Vec.add(this.pos, Vec.unit(Math.random() * 2 * Math.PI, 0.0003 * Math.sqrt(this.dynPressure)));
         // let sumHeight = 0;
         let maxWidth = 0;
         for (let i = 0; i < this.stages.length; i++) {
@@ -293,7 +348,7 @@ export class StagedRocket {
         for (let i = 0; i < this.droppedStages.length; i++) {
             this.droppedStages[i].drawMe(scene);
         }
-/*
+        /*
         var grd = scene.ctx.createLinearGradient(0, 0, 170, 0);
         grd.addColorStop(0, "rgba(200, 100, 100, 0.6)");
         grd.addColorStop(1, "rgba(200, 100, 100, 0)");
@@ -301,7 +356,8 @@ export class StagedRocket {
         let glowOffset = new Vec2((sumHeight - this.stages[0].height) / 2, 0);
         let glowHeight = sumHeight + 2;
         let glowWidth = maxWidth + 2;
-        scene.rect(this.pos, glowHeight, glowWidth, this.angle, grd, glowOffset, false, true);*/
+        scene.rect(this.pos, glowHeight, glowWidth, this.angle, grd, glowOffset, false, true);
+        */
 
         // draw velocity vector
         if (scene.camera.zoom < 1.5) { // if zoomed out
