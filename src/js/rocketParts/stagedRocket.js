@@ -235,7 +235,7 @@ export class StagedRocket {
 
         this.updateMass();
         if (rLenSqrd < planet.radius ** 2) { // collision with planet
-            if (velLength > 4 && this.focus) { // show crash
+            if (velLength > 5 && this.focus) { // show crash
                 $('#crash').html(`CRASHED AT ${Math.round(velLength)} m/s`);
                 window.setTimeout(() => {
                     $('#crash').html('');

@@ -83,7 +83,7 @@ export const fuelTankPresets = {
         width: 3.77,
     },
     Dragon: {
-        dryMass: 4200 + 6000 - 1388,
+        dryMass: 4200 + 6000 - 1900,
         wetMass: 4200 + 6000,
         height: 3.1,
         width: 3.77,
