@@ -155,6 +155,10 @@ function init() {
                     mainRocket.droppedStages = [];
                 }
             }
+        } else if (e.which === 34 && $(':focus').length === 0) {
+            scene.camera.zoom *= 0.8;
+        } else if (e.which === 33 && $(':focus').length === 0) {
+            scene.camera.zoom *= 1.2;
         }
     });
 
