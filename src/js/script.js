@@ -2,10 +2,8 @@ import { Vec2, Vector as Vec } from './vector';
 import { Scene } from './scene';
 import { Circle } from './shapes';
 import { Planet } from './sprites/planet';
-import { Rocket } from './rocketParts/rocket';
-import { engineFromPreset } from './rocketParts/rocketPresets';
 import { StagedRocket } from './rocketParts/stagedRocket';
-import { Stage, stageFromPreset } from './rocketParts/stage';
+import { stageFromPreset } from './rocketParts/stage';
 import { stageListFromString } from './rocketParts/stagelist';
 
 window.stepSize = 1 / 60;
@@ -65,7 +63,7 @@ function update() {
 
 setInterval(update, window.stepSize * 1000);
 
-function draw(currentTime) {
+function draw() { // currentTime
     scene.clear();
 
     for (let i = 0; i < trailList.length; i++) {
@@ -86,7 +84,7 @@ function draw(currentTime) {
     $('#apoapsis').html(Math.round((focusStage.orbitalParams.apoapsis - pRad) * 100) / 100);
     $('#periapsis').html(Math.round((focusStage.orbitalParams.periapsis - pRad) * 100) / 100);
     $('#trueAnomaly').html(Math.round(focusStage.orbitalParams.trueAnomaly * 100) / 100);
-    $('#acceleration').html('[g] ' + Math.round(1/9.81 * focusStage.acc.length() * 100) / 100);
+    $('#acceleration').html(`[g] ${Math.round(1 / 9.81 * focusStage.acc.length() * 100) / 100}`);
     $('#deltaV').html(Math.round(focusStage.getDeltaV() * 100) / 100);
     $('#fuel').html(Math.round(focusStage.stages[0].fuelTank.fuel * 100) / 100);
     $('#dynPressure').html(Math.round(focusStage.dynPressure * 100) / 100);
