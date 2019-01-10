@@ -3,7 +3,7 @@ import { ellipticalOrbit } from '../Shapes/ellipticalOrbit';
 import { ISA } from '../physics/atmosphere';
 
 export class StagedRocket {
-    constructor(pos, vel, angle, stageList, planetList, isParent = true) {
+    constructor(pos, vel, angle, stageList, planetList, isParent = true, canvasId = 'canvas') {
         this.pos = pos;
         this.vel = vel;
         this.angle = angle;
@@ -14,6 +14,7 @@ export class StagedRocket {
         this.droppedStages = [];
         this.planetList = planetList;
         this.machNumber = 0;
+        this.canvasSelector = `#${canvasId}`;
 
         // focus on rocket, user can control it
         this.focus = isParent;
@@ -45,19 +46,21 @@ export class StagedRocket {
 
         if (this.isParent) {
             $(window).keydown((e) => {
-                switch (e.which) {
-                case 67:
-                    this.changeFocus();
-                    break;
+                if ($(':focus').length === 0) {
+                    switch (e.which) {
+                    case 67:
+                        _self.changeFocus();
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
+                    }
                 }
             });
         }
 
         $(window).keydown((e) => {
-            if (this.focus) {
+            if (_self.focus && $(':focus').length === 0) {
                 switch (e.which) {
                 // left/right
                 case 37:
@@ -78,9 +81,9 @@ export class StagedRocket {
                     break;
 
                 case 32:
-                    if (!this.spacePressed) {
-                        this.spacePressed = true;
-                        this.seperateStage();
+                    if (!_self.spacePressed) {
+                        _self.spacePressed = true;
+                        _self.seperateStage();
                     }
                     break;
 
@@ -92,7 +95,7 @@ export class StagedRocket {
 
 
         $(window).keyup((e) => {
-            if (this.focus) {
+            if (_self.focus && $(':focus').length === 0) {
                 switch (e.which) {
                 // left/right
                 case 37:
@@ -110,7 +113,7 @@ export class StagedRocket {
                     _self.stages[0].engine.throttleStop();
                     break;
                 case 32:
-                    this.spacePressed = false;
+                    _self.spacePressed = false;
                     break;
                 default:
                     break;
@@ -192,6 +195,12 @@ export class StagedRocket {
         refArea += Math.abs(capArea * Math.cos(angleOfAttack));
 
         return refArea;
+    }
+
+    resetDynamics() {
+        this.vel = new Vec2(0, 0);
+        this.angle = -Math.PI / 2;
+        this.angularVel = 0;
     }
 
     updateMass() {

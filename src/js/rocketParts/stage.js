@@ -8,7 +8,7 @@ export class Stage {
         height = 71,
         width = 3.66,
         fireLength = 40,
-        fireWidth = 2.5,
+        fireWidth = width * 0.8,
         hasCap = false,
         color = "#ffffff",
     } = {}) {
@@ -44,7 +44,7 @@ export class Stage {
             randAngle = (Math.random() - 0.5) * 0.005;
             newFireLength = fireAmount * this.fireLength * 0.8 - 0.1 * Math.random();
             fireOffset = new Vec2(-(this.height / 2) - newFireLength / 2, 0);
-            scene.rect(pos, newFireLength, 1.5, angle + randAngle, '#ffe99699', fireOffset);
+            scene.rect(pos, newFireLength, this.fireWidth * 0.7, angle + randAngle, '#ffe99699', fireOffset);
 
             // stop shadow
             scene.setShadow();
@@ -80,13 +80,17 @@ export class Stage {
         // update thrust and consume fuel
         this.simulateFrame(dt);
         return this.engine.thrust;
-}
+    }
 }
 
 
-export function stageFromPreset(EngineName, numEngines, fuelTankName, numFueltanks, cap = false) {
+export function stageFromPreset(EngineName, numEngines, fuelTankName, numFueltanks = 1) {
     const eng = enginePresets[EngineName];
     const fuelConf = fuelTankPresets[fuelTankName];
+    if (eng === undefined || fuelConf === undefined) {
+        return false;
+    }
+    const cap = Boolean(fuelConf.cap);
 
     const engine = new Engine(eng.mass, eng.Isp, eng.maxThrust, eng.minThrust, numEngines);
     const fuelTank = new FuelTank(fuelConf.wetMass, fuelConf.dryMass);

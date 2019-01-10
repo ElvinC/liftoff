@@ -6,8 +6,10 @@ import { Rocket } from './rocketParts/rocket';
 import { engineFromPreset } from './rocketParts/rocketPresets';
 import { StagedRocket } from './rocketParts/stagedRocket';
 import { Stage, stageFromPreset } from './rocketParts/stage';
+import { stageListFromString } from './rocketParts/stagelist';
 
 window.stepSize = 1 / 60;
+window.makeStage = stageFromPreset;
 
 // one function for requesting animation frame
 window.requestAnimFrame = ((function animationFrame(/* callback */) {
@@ -84,7 +86,7 @@ function draw(currentTime) {
     $('#apoapsis').html(Math.round((focusStage.orbitalParams.apoapsis - pRad) * 100) / 100);
     $('#periapsis').html(Math.round((focusStage.orbitalParams.periapsis - pRad) * 100) / 100);
     $('#trueAnomaly').html(Math.round(focusStage.orbitalParams.trueAnomaly * 100) / 100);
-    $('#acceleration').html("[g] " + Math.round(1/9.81 * focusStage.acc.length() * 100) / 100);
+    $('#acceleration').html('[g] ' + Math.round(1/9.81 * focusStage.acc.length() * 100) / 100);
     $('#deltaV').html(Math.round(focusStage.getDeltaV() * 100) / 100);
     $('#fuel').html(Math.round(focusStage.stages[0].fuelTank.fuel * 100) / 100);
     $('#dynPressure').html(Math.round(focusStage.dynPressure * 100) / 100);
@@ -128,10 +130,10 @@ function init() {
     stageList.push(newStage2);
     const trunk = stageFromPreset('NoEngine', 0, 'DragonTrunk', 1);
     stageList.push(trunk);
-    const fairing = stageFromPreset('SuperDraco', 8, 'Dragon', 1, true);
+    const fairing = stageFromPreset('SuperDraco', 8, 'Dragon', 1);
     stageList.push(fairing);
 
-    mainRocket = new StagedRocket(new Vec2(0, 0), new Vec2(0, 0), -Math.PI / 2, stageList, planetList);
+    mainRocket = new StagedRocket(new Vec2(0, 0), new Vec2(0, 0), -Math.PI / 2, stageList, planetList, 'canvas');
 
     window.rocket = mainRocket; // for debugging
     spriteList.push(mainRocket);
@@ -140,7 +142,25 @@ function init() {
         trailList.push(new Circle(mainRocket.pos.x, mainRocket.pos.y, 0.5, '#ffffff77', 0, 0));
     }
 
-    $(window).bind('mousewheel', (e) => {
+    $(window).keydown((e) => {
+        if (e.which === 82 && $(':focus').length === 0) {
+            // restart game
+            if (confirm('Restart game?')) {
+                const stageListString = $('#rocketConfig').val();
+                const newStageList = stageListFromString(stageListString);
+                console.log(newStageList);
+                if (newStageList !== false) {
+                    // restart game
+                    mainRocket.pos = new Vec2(0, 0);
+                    mainRocket.resetDynamics();
+                    mainRocket.stages = newStageList;
+                    mainRocket.droppedStages = [];
+                }
+            }
+        }
+    });
+
+    $('#canvas').bind('mousewheel', (e) => {
         const changeAmount = Math.max(0.01, 1 + e.originalEvent.wheelDelta / 1000);
         scene.camera.zoom *= changeAmount;
     });

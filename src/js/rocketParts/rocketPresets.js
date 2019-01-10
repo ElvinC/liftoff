@@ -65,6 +65,8 @@ export const fuelTankPresets = {
     Electron: {
         dryMass: 1250,
         wetMass: 12500,
+        height: 17,
+        width: 1.2,
     },
     SaturnV: {
         dryMass: 2970000 - 2160000,
@@ -87,12 +89,23 @@ export const fuelTankPresets = {
         wetMass: 4200 + 6000,
         height: 3.1,
         width: 3.77,
+        cap: true,
+    },
+    SaturnVStage1: {
+        dryMass: 131000,
+        wetMass: 2280000,
+        height: 42,
+        width: 10,
     },
 };
 
 export function engineFromPreset(engineName, fuelTankName, numEngines, infiniteFuel = false) {
     const eng = enginePresets[engineName];
     const fuelConf = fuelTankPresets[fuelTankName];
+
+    if (eng === undefined || fuelConf === undefined) {
+        return false;
+    }
 
     const fuelTank = new FuelTank(fuelConf.wetMass, fuelConf.dryMass);
     const engine = new Engine(eng.mass, eng.Isp, eng.maxThrust, eng.minThrust, numEngines, fuelTank, infiniteFuel);

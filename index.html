@@ -22,8 +22,21 @@
 		fuel: <span id="fuel">0</span><br>
 		deltaV: <span id="deltaV">0</span><br><br>
 		Simulation speed:
-		<input type="number" name="simSpeed" id="simSpeed" value="1" min="1" max="300" step="1">
+		<input type="number" name="simSpeed" id="simSpeed" value="1" min="1" max="300" step="1"><br>
+		Rocket configuration:
+		<textarea id="rocketConfig">
+# engine number stage
+SuperDraco 8 Dragon
+NoEngine 0 DragonTrunk
+Merlin1DVac 1 f9stage2
+merlin1D 9 f9stage1</textarea> <br>
+		Fly: Arrows<br>
+		Staging: Space<br>
+		Change focus: C<br>
+		Restart: R<br>
+		Zoom: Scroll
 	</div>
+
 	<div id="crash"></div>
 	<canvas id="canvas" height="600" width="1000"></canvas>
 </body>
