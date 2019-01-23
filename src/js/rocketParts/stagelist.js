@@ -10,7 +10,7 @@ export function stageListFromString(stageListString) {
 
             // remove spaces before/after
             line = line.replace(/^\s+|\s+$/g, '');
-            if (line[0] !== '#') {
+            if (line[0] !== '#' && line !== '') {
                 // not a comment
                 const splitLine = line.split(' ');
                 if (splitLine.length !== 3) {
