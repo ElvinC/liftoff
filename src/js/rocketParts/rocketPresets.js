@@ -52,7 +52,7 @@ export const enginePresets = {
         maxThrust: 490000,
         minThrust: 90000,
         mass: 0,
-        fireLength: 1,
+        fireLength: 3,
     },
     NSEscape: {
         Isp: 200,
@@ -112,17 +112,17 @@ export const fuelTankPresets = {
         width: 10,
     },
     NSCapsule: {
-        height: 4,
+        height: 3.7,
         width: 3.65,
-        dryMass: 4300,
-        wetMass: 4000,
+        dryMass: 4000,
+        wetMass: 4300,
         cap: true,
     },
     NSBooster: {
         height: 14,
         width: 3.5,
-        dryMass: 10000,
-        wetMass: 34000,
+        dryMass: 9000,
+        wetMass: 35000,
     },
 };
 
