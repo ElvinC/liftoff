@@ -1,4 +1,4 @@
-import { Vector2D as Vec2, Vector as Vec } from './vector';
+import { Vec2, Vector as Vec } from './vector';
 
 export class Scene {
     constructor(canvasId) {
@@ -45,12 +45,14 @@ export class Scene {
         return newPos;
     }
 
-    fillAndClose(color, stroke = false) {
+    fillAndClose(fill, color, stroke = false, strokeColor = '#555') {
         this.ctx.fillStyle = color;
-        this.ctx.fill();
+        if (fill) {
+            this.ctx.fill();
+        }
         if (stroke) {
             this.ctx.lineWidth = 2;
-            this.ctx.strokeStyle = '#555';
+            this.ctx.strokeStyle = strokeColor;
             this.ctx.stroke();
         }
         this.ctx.closePath();
@@ -59,8 +61,7 @@ export class Scene {
 
 
     // Draw a circle with the given position, radius and color
-    circle(pos, radius, color = '#000000', rotation = 0, offset) {
-        // console.log(pos instanceof Vec2)
+    circle(pos, radius, color = '#000000', rotation = 0, offset, startRadius = 0, stopRadius = 2 * Math.PI) {
         const scaledRadius = radius * this.camera.zoom;
         if (scaledRadius < 0.7) { // don't render tiny primitives.
             return;
@@ -75,12 +76,12 @@ export class Scene {
         if (offset) { // with offset
             this.ctx.rotate(rotation);
             const scaledOffset = offset.multiply(this.camera.zoom);
-            this.ctx.arc(scaledOffset.x, scaledOffset.y, scaledRadius, 0, 2 * Math.PI, false);
+            this.ctx.arc(scaledOffset.x, scaledOffset.y, scaledRadius, startRadius, stopRadius, false);
         } else {
-            this.ctx.arc(0, 0, scaledRadius, 0, 2 * Math.PI, false);
+            this.ctx.arc(0, 0, scaledRadius, startRadius, stopRadius, false);
         }
 
-        this.fillAndClose(color);
+        this.fillAndClose(true, color);
     }
 
     /**
@@ -93,7 +94,7 @@ export class Scene {
      * @param {Vec2} offset Drawing offset
      * @param {Boolean} stroke Draw stroke
      */
-    rect(pos, width, height, rotation = 0, color = '#000000', offset, stroke = false) {
+    rect(pos, width, height, rotation = 0, color = '#000000', offset, stroke = false, fill = true) {
         const newPos = this.calculateCoords(pos);
 
         const newWidth = width * this.camera.zoom;
@@ -111,10 +112,22 @@ export class Scene {
             this.ctx.rect(-newWidth / 2, -newHeight / 2, newWidth, newHeight);
         }
 
-        this.fillAndClose(color, stroke);
+        this.fillAndClose(fill, color, stroke);
     }
 
-    circleGradient(pos, startRadius, stopRadius, startColor = 'rgba(170, 170, 255, 0.6)', stopColor = 'rgba(255, 255, 255, 0)') {
+    /**
+     * Draw a radial gradient
+     * @param {Vec2} pos position
+     * @param {Number} startRadius Start radius of gradient
+     * @param {Number} stopRadius End radius of gradient
+     * @param {Object} param Color settings
+     * @param {String} startColor Start color of gradient
+     * @param {String} stopColor Stop color of gradient
+     */
+    circleGradient(pos, startRadius, stopRadius, {
+        startColor = 'rgba(170, 170, 255, 0.6)',
+        stopColor = 'rgba(255, 255, 255, 0)',
+    } = {}) {
         // const newPos = this.calculateCoords(pos);
         const newStartRadius = startRadius * this.camera.zoom;
         const newStopRadius = stopRadius * this.camera.zoom;
@@ -125,24 +138,81 @@ export class Scene {
     }
 
     /**
+     * Change context shadow settings
+     * @param {String} color the color of the blur
+     * @param {Number} blur The blur size
+     */
+    setShadow(color = 'transparent', blur = 0) {
+        this.ctx.shadowColor = color;
+        this.ctx.shadowBlur = blur;
+    }
+
+    /**
+     * Generate an ellipse
+     * @param {Object} conf The settings
+     * @param {Vec2} conf.pos Position vector
+     * @param {Number} conf.radX Minor radius
+     * @param {Number} conf.ranY Major radius
+     * @param {Number} conf.rotation Rotation in radians
+     * @param {String} conf.color Color of the ellipse
+     * @param {Number} conf.startAngle Starting angle in radians
+     * @param {Number} conf.endAngle Ending angle in radians
+     * @param {Vec2} conf.offset offset vector
+     * @param {Boolean} stroke add outline
+     */
+    ellipse({
+        pos,
+        radX = 5,
+        radY = 2,
+        rotation = 0,
+        color = '#000000',
+        startAngle = 0,
+        endAngle = 2 * Math.PI,
+        offset,
+        stroke = false,
+        strokeColor = '#000000',
+        fill = true,
+    } = {}) {
+        const newPos = this.calculateCoords(pos);
+
+        const newRadX = radX * this.camera.zoom;
+        const newRadY = radY * this.camera.zoom;
+
+
+        this.ctx.beginPath();
+        this.ctx.translate(newPos.x, newPos.y);
+        // this.ctx.rotate(rotation);
+
+        if (offset) { // with offset
+            const newOffset = offset.multiply(this.camera.zoom);
+            this.ctx.ellipse(newOffset.x, newOffset.x, newRadX, newRadY, rotation, startAngle, endAngle);
+        } else {
+            this.ctx.ellipse(0, 0, newRadX, newRadY, rotation, startAngle, endAngle);
+        }
+
+        this.fillAndClose(fill, color, stroke, strokeColor);
+    }
+
+
+    /**
      * Draws a vector
      * @param {Vec2} pos start of vector
      * @param {Vec2} theVector
      */
-    drawVector(pos, theVector, width = 0.5, scaling = 1) {
+    drawVector(pos, theVector, width = 0.5, length = 1, color = '#ffffff') {
         // draw a dot, center of mass.
-        this.circle(pos, width * 1.5 * scaling, '#88f');
+        this.circle(pos, width * 1.5, color);
         const newStart = this.calculateCoords(pos);
-        const vecEnd = Vec.add(pos, theVector.multiply(scaling));
+        const vecEnd = Vec.add(pos, theVector.multiply(length));
         const newStop = this.calculateCoords(vecEnd);
 
         this.ctx.beginPath();
         this.ctx.moveTo(newStart.x, newStart.y);
         this.ctx.lineTo(newStop.x, newStop.y);
-        this.ctx.lineWidth = width * this.camera.zoom * scaling;
-        this.ctx.strokeStyle = '#88f';
+        this.ctx.lineWidth = width * this.camera.zoom;
+        this.ctx.strokeStyle = color;
         this.ctx.stroke();
 
-        this.circle(vecEnd, width * 0.6 * scaling, '#88f');
+        this.circle(vecEnd, width * 0.6, color);
     }
 }

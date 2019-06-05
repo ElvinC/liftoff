@@ -1,0 +1,2 @@
+export const GRAVITATIONAL_CONSTANT = 6.67408e-11;
+export const STANDARD_GRAVITY = 9.80665;
